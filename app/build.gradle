@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'org.greenrobot.greendao'
 
 android {
     compileSdkVersion 24
@@ -18,12 +19,18 @@ android {
         }
     }
 }
-
+greendao {
+    schemaVersion 1000
+}
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     compile 'com.android.support:appcompat-v7:24.2.1'
+    compile 'org.greenrobot:greendao:3.2.0'
+//    This is only needed if you want to use encrypted databases
+    compile 'net.zetetic:android-database-sqlcipher:3.5.4'
     testCompile 'junit:junit:4.12'
 }
+uploadArchives.enabled = false

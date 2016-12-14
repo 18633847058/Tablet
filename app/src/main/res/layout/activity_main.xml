@@ -11,8 +11,18 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.yang.nav.view.activity.MainActivity">
     <Button
-        android:id="@+id/btn_test"
+        android:id="@+id/btn_dialog"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="open dialog"/>
+    <Button
+        android:id="@+id/btn_insert"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="insert"/>
+    <Button
+        android:id="@+id/btn_query"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="query"/>
 </LinearLayout>
