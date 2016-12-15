@@ -10,39 +10,69 @@ import org.greenrobot.greendao.annotation.Generated;
  */
 @Entity
 public class Point {
-    @Id
-    private Long id;
+    @Id(autoincrement = true)
+    private Long id = null;
     //经度
     @NotNull
     private float longitude;
     //纬度
     @NotNull
     private float latitude;
-    @Generated(hash = 676000228)
-    public Point(Long id, float longitude, float latitude) {
+    //时间
+    @NotNull
+    private Long time;
+
+    @Generated(hash = 1393679492)
+    public Point(Long id, float longitude, float latitude, @NotNull Long time) {
         this.id = id;
         this.longitude = longitude;
         this.latitude = latitude;
+        this.time = time;
     }
+
     @Generated(hash = 1977038299)
     public Point() {
     }
+    
+    @Override
+    public String toString() {
+        return "Point{" +
+                "id=" + id +
+                ", longitude=" + longitude +
+                ", latitude=" + latitude +
+                ", time='" + time + '\'' +
+                '}';
+    }
+
     public Long getId() {
         return this.id;
     }
+
     public void setId(Long id) {
         this.id = id;
     }
+
     public float getLongitude() {
         return this.longitude;
     }
+
     public void setLongitude(float longitude) {
         this.longitude = longitude;
     }
+
     public float getLatitude() {
         return this.latitude;
     }
+
     public void setLatitude(float latitude) {
         this.latitude = latitude;
+    }
+
+    public Long getTime() {
+        return this.time;
+    }
+
+    public void setTime(Long time) {
+        this.time = time;
     }
 }

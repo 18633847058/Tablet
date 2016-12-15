@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
         btn_insert.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                pointDao.insert(new Point(1L,2,3));
+                pointDao.insert(new Point(null,4,5,1L));
             }
         });
         btn_query.setOnClickListener(new View.OnClickListener() {
@@ -45,7 +45,8 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 QueryBuilder qb = pointDao.queryBuilder();
                 //获取QueryBuilder // 设置查询条件  //设置排序
-                List<Point> points = qb.list();qb.where(PointDao.Properties.Id.eq("1")).list();
+                List<Point> points = qb.list();
+                qb.where(PointDao.Properties.Id.eq("1")).list();
                 //.orderAsc(PointDao.Properties.LastName)
                 for(Point point : points){
                     ToastUtils.showToast(MainActivity.this,point.toString());
