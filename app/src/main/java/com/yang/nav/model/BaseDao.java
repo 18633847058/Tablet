@@ -90,14 +90,7 @@ public class BaseDao<T> {
         }
         try {
 
-            session.getDao(clss).updateInTx(new Runnable() {
-                @Override
-                public void run() {
-                    for(T object:objects){
-                        session.update(object);
-                    }
-                }
-            });
+            session.getDao(clss).updateInTx(objects);
         } catch (Exception e) {
             Log.e(TAG, e.toString());
         }
@@ -172,7 +165,7 @@ public class BaseDao<T> {
      * @param id
      * @return
      */
-    public T QueryById(long id,Class object){
+    public T queryById(long id,Class object){
         return (T) session.getDao(object).loadByRowId(id);
     }
 
@@ -181,7 +174,7 @@ public class BaseDao<T> {
      * @param object
      * @return
      */
-    public List<T> QueryObject(Class object,String where,String...params){
+    public List<T> queryObject(Class object,String where,String...params){
         Object obj = null;
         List<T> objects = null;
         try {
@@ -201,7 +194,7 @@ public class BaseDao<T> {
      * @param object
      * @return
      */
-    public List<T> QueryAll(Class object){
+    public List<T> queryAll(Class object){
         List<T> objects = null;
         try {
             objects = (List<T>) session.getDao(object).loadAll();
@@ -215,7 +208,7 @@ public class BaseDao<T> {
     /**
      * 关闭数据库一般在Odestory中使用
      */
-    public void CloseDataBase(){
+    public void closeDataBase(){
         manager.closeDataBase();
     }
 }

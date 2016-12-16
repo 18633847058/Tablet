@@ -1,5 +1,7 @@
 package com.yang.nav.model.entity;
 
+import com.yang.nav.utils.TimeUtils;
+
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.NotNull;
@@ -40,7 +42,7 @@ public class Point {
                 "id=" + id +
                 ", longitude=" + longitude +
                 ", latitude=" + latitude +
-                ", time='" + time + '\'' +
+                ", time='" + TimeUtils.convertToStr(time) + '\'' +
                 '}';
     }
 
