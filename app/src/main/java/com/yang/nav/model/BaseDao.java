@@ -143,18 +143,11 @@ public class BaseDao<T> {
     public boolean deleteMultObject(final List<T> objects, Class clss){
         boolean flag = false;
         if (null == objects || objects.isEmpty()){
-            return false;
+            return flag;
         }
         try {
 
-            session.getDao(clss).deleteInTx(new Runnable() {
-                @Override
-                public void run() {
-                    for(T object:objects){
-                        session.delete(object);
-                    }
-                }
-            });
+            session.getDao(clss).deleteInTx(objects);
             flag = true;
         } catch (Exception e) {
             Log.e(TAG, e.toString());

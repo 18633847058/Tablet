@@ -10,22 +10,37 @@ import org.greenrobot.greendao.query.QueryBuilder;
 import java.util.ArrayList;
 import java.util.List;
 
+
 /**
  * Created by Yang on 2016/12/15.
  */
 
 public class PointManager extends BaseDao<Point> {
-    public PointManager(Context context) {
+
+    private volatile static PointManager pointManager;//多线程访问
+
+    public static PointManager getInstance(Context context){
+        PointManager instance = null;
+        if(pointManager == null){
+            synchronized (DaoManager.class){
+                if(instance == null){
+                    instance = new PointManager(context);
+                    pointManager = instance;
+                }
+            }
+        }
+        return pointManager;
+    }
+    private PointManager(Context context) {
         super(context);
     }
     /***************************数据库查询*************************/
-
     /**
      * 通过ID查询对象
      * @param id
      * @return
      */
-    private Point loadById(long id){
+    public Point loadById(long id){
 
         return session.getPointDao().load(id);
     }
@@ -35,7 +50,7 @@ public class PointManager extends BaseDao<Point> {
      * @param point
      * @return
      */
-    private long getID(Point point){
+    public long getID(Point point){
 
         return session.getPointDao().getKey(point);
     }
@@ -44,7 +59,7 @@ public class PointManager extends BaseDao<Point> {
      * 通过名字获取Customer对象
      * @return
      */
-    private List<Point> getPointByTime(String key){
+    public List<Point> getPointByTime(String key){
         QueryBuilder queryBuilder =  session.getPointDao().queryBuilder();
         queryBuilder.where(PointDao.Properties.Time.eq(key));
         int size = queryBuilder.list().size();
@@ -59,7 +74,7 @@ public class PointManager extends BaseDao<Point> {
      * 通过名字获取Customer对象的id集合
      * @return
      */
-    private List<Long> getIdByName(String key){
+    public List<Long> getIdByName(String key){
         List<Point> points = getPointByTime(key);
         List<Long> ids = new ArrayList<Long>();
         int size = points.size();
@@ -73,13 +88,30 @@ public class PointManager extends BaseDao<Point> {
         }
     }
 
+    /**
+     * 通过时间间隔获取point集合
+     * @param start
+     * @param end
+     * @return
+     */
+    public List<Point> getPointsByTime(Long start, Long end){
+        QueryBuilder queryBuilder =  session.getPointDao().queryBuilder();
+        queryBuilder.where(PointDao.Properties.Time.between(start,end));
+        int size = queryBuilder.list().size();
+        if (size > 0){
+            return queryBuilder.list();
+        }else{
+            return null;
+        }
+    }
+
     /***************************数据库删除*************************/
 
     /**
      * 根据ID进行数据库的删除操作
      * @param id
      */
-    private void deleteById(long id){
+    public void deleteById(long id){
 
         session.getPointDao().deleteByKey(id);
     }
@@ -89,8 +121,12 @@ public class PointManager extends BaseDao<Point> {
      * 根据ID同步删除数据库操作
      * @param ids
      */
-    private void deleteByIds(List<Long> ids){
+    public void deleteByIds(List<Long> ids){
 
         session.getPointDao().deleteByKeyInTx(ids);
+    }
+    public boolean deletePointsByTime(Long start, Long end){
+        List<Point> points = getPointsByTime(start,end);
+        return deleteMultObject(points,Point.class);
     }
 }
