@@ -1,12 +1,15 @@
 package com.yang.nav.utils;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
 import com.yang.nav.R;
+import com.yang.nav.model.PointManager;
 
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 
@@ -47,5 +50,25 @@ public class DialogUtils {
         if (loadingDialog != null && loadingDialog.isShowing()) {
             loadingDialog.dismiss();
         }
+    }
+    public static void showAlertDialog(final Context context, final String file, final PointManager pointManager){
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setMessage("确认导入该文件？");
+        builder.setTitle("提示");
+        builder.setPositiveButton("确认", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                MyAsyncTask myAsyncTask = new MyAsyncTask(context,pointManager);
+                myAsyncTask.setFile(file);
+                myAsyncTask.execute(MyAsyncTask.Type.IMPORT);
+            }
+        });
+        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();}
+        });
+        builder.create().show();
     }
 }

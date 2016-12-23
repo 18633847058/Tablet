@@ -18,20 +18,27 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    sourceSets {
+        main {
+            //jni库的调用会到资源文件夹下libs里面找so文件
+            jniLibs.srcDirs = ['libs']
+        }
+    }
 }
 greendao {
     schemaVersion 1000
 }
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+    //    This is only needed if you want to use encrypted databases
     compile 'com.android.support:appcompat-v7:24.2.1'
     compile 'org.greenrobot:greendao:3.2.0'
     compile 'com.jzxiang.pickerview:TimePickerDialog:1.0.1'
-//    This is only needed if you want to use encrypted databases
     compile 'net.zetetic:android-database-sqlcipher:3.5.4'
+    compile 'com.android.support:design:24.2.1'
     testCompile 'junit:junit:4.12'
 }
 uploadArchives.enabled = false

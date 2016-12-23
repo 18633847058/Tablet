@@ -2,6 +2,9 @@ package com.yang.nav;
 
 import android.app.Application;
 
+import com.mapbar.license.License;
+import com.mapbar.mapdal.NativeEnv;
+import com.mapbar.mapdal.WorldManager;
 import com.yang.nav.model.PointManager;
 
 /**
@@ -14,6 +17,7 @@ public class BaseApplication extends Application {
 //
 //    private DaoSession daoSession;
     private PointManager pointManager;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -26,9 +30,14 @@ public class BaseApplication extends Application {
     @Override
     public void onTerminate() {
         pointManager.closeDataBase();
+        WorldManager.getInstance().cleanup();
+        NativeEnv.cleanup();
+        License.cleanup();
         super.onTerminate();
     }
 //    public DaoSession getDaoSession() {
 //        return daoSession;
 //    }
+
+
 }

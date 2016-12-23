@@ -1,3 +1,20 @@
 <resources>
     <string name="app_name">飞行平板</string>
+    <string name="title_activity_main2">Main2Activity</string>
+    <string name="time">2012-06-12 12:21</string>
+    <string name="start_time">开始时间：</string>
+    <string name="data_manager_title">管理数据的开始时间以及结束时间：</string>
+    <string name="end_time">结束时间：</string>
+    <string name="delete">删除</string>
+    <string name="export_info">导出</string>
+    <string name="import_info">导入</string>
+    <string name="review">回看</string>
+    <string name="plane_model">飞行模式</string>
+    <string name="work_model">办公模式</string>
+    <string name="data_manager_model">数据管理模式</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
 </resources>

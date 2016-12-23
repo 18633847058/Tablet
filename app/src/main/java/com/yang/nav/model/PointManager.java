@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.yang.nav.model.entity.Point;
 import com.yang.nav.model.entity.PointDao;
+import com.yang.nav.utils.TimeUtils;
 
 import org.greenrobot.greendao.query.QueryBuilder;
 
@@ -90,11 +91,13 @@ public class PointManager extends BaseDao<Point> {
 
     /**
      * 通过时间间隔获取point集合
-     * @param start
-     * @param end
+     * @param s
+     * @param e
      * @return
      */
-    public List<Point> getPointsByTime(Long start, Long end){
+    public List<Point> getPointsByTime(String s, String e){
+        Long start = TimeUtils.convertToMil(s);
+        Long end = TimeUtils.convertToMil(e);
         QueryBuilder queryBuilder =  session.getPointDao().queryBuilder();
         queryBuilder.where(PointDao.Properties.Time.between(start,end));
         int size = queryBuilder.list().size();
@@ -125,8 +128,8 @@ public class PointManager extends BaseDao<Point> {
 
         session.getPointDao().deleteByKeyInTx(ids);
     }
-    public boolean deletePointsByTime(Long start, Long end){
+    public boolean deletePointsByTime(String start, String end){
         List<Point> points = getPointsByTime(start,end);
-        return deleteMultObject(points,Point.class);
+        return points!=null&&!points.isEmpty()&&deleteMultObject(points,Point.class);
     }
 }
