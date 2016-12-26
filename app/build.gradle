@@ -24,6 +24,11 @@ android {
             jniLibs.srcDirs = ['libs']
         }
     }
+//    externalNativeBuild {
+//        ndkBuild {
+//            path file("src\\main\\jni\\Android.mk")
+//        }
+//    }
 }
 greendao {
     schemaVersion 1000

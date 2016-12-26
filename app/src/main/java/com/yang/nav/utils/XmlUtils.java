@@ -114,6 +114,7 @@ public class XmlUtils {
                         case XmlPullParser.END_TAG:
                             if (xmlParser.getName().equals("trkpt")) { // 判断结束标签元素是否是book
                                 list.add(point); // 将book添加到books集合
+                                Log.e("定位信息", "parseXml: " + point.toString());
                                 point = null;
                             }
                             break;

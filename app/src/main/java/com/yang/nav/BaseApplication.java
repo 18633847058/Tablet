@@ -6,6 +6,9 @@ import com.mapbar.license.License;
 import com.mapbar.mapdal.NativeEnv;
 import com.mapbar.mapdal.WorldManager;
 import com.yang.nav.model.PointManager;
+import com.yang.nav.utils.SerialPortUtil;
+
+import cn.wch.ch34xuartdriver.CH34xUARTDriver;
 
 /**
  * Created by Yang on 2016/12/14.
@@ -17,11 +20,13 @@ public class BaseApplication extends Application {
 //
 //    private DaoSession daoSession;
     private PointManager pointManager;
+    private CH34xUARTDriver driver;
 
     @Override
     public void onCreate() {
         super.onCreate();
         pointManager = PointManager.getInstance(getApplicationContext());
+        driver = SerialPortUtil.getDriver(getApplicationContext());
 //        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(this, ENCRYPTED ? "notes-db-encrypted" : "notes-db");
 //        Database db = ENCRYPTED ? helper.getEncryptedWritableDb("super-secret") : helper.getWritableDb();
 //        daoSession = new DaoMaster(db).newSession();
