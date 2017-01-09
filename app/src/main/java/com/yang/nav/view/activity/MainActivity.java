@@ -70,10 +70,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.ll_plane:
-                startActivity(new Intent(MainActivity.this,PlaneActivity.class));
+                startActivity(new Intent(MainActivity.this,MapViewActivity.class));
                 break;
             case R.id.ll_work:
-                ToastUtils.showToast(MainActivity.this,v.getId()+"");
+
                 break;
             case R.id.ll_data:
                 startActivity(new Intent(MainActivity.this,DataManagerActivity.class));

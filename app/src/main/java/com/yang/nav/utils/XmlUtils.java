@@ -24,7 +24,7 @@ import java.util.List;
 public class XmlUtils {
     private static final String NAME_SPACE = "http://www.topografix.com/GPX/1/1";
     public static void XmlFileCreator(List<Point> pointList){
-        File newXmlFile = new File("/storage/sdcard0/mapbar/app/test.xml");
+        File newXmlFile = new File("/storage/sdcard0/mapbar/app/test.gpx");
         try{
             if(!newXmlFile.exists())
                 newXmlFile.createNewFile();
@@ -46,10 +46,8 @@ public class XmlUtils {
             //set indentation option
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
             serializer.setPrefix("","http://www.topografix.com/GPX/1/1");
-            serializer.setPrefix("gpxx","http://www.garmin.com/xmlschemas/GpxExtensions/v3");
-            serializer.setPrefix("gpxtpx","http://www.garmin.com/xmlschemas/TrackPointExtension/v1");
             serializer.setPrefix("xsi","http://www.w3.org/2001/XMLSchema-instance");
-            serializer.setPrefix("schemaLocation","http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd");
+            serializer.setPrefix("schemaLocation","http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd");
             serializer.startTag(NAME_SPACE,"gpx");
             serializer.startTag(null,"trk");
             serializer.startTag(null,"trkseg");
@@ -58,7 +56,7 @@ public class XmlUtils {
                 serializer.attribute(null,"lat",point.getLatitude()+"");
                 serializer.attribute(null,"lon",point.getLongitude()+"");
                 serializer.startTag(null,"time");
-                serializer.text(point.getTime()+"");
+                serializer.text(TimeUtils.convertToGPXStr(point.getTime()));
                 serializer.endTag(null,"time");
                 serializer.endTag(null,"trkpt");
             }
@@ -102,12 +100,12 @@ public class XmlUtils {
                         case XmlPullParser.START_TAG:
                             if (xmlParser.getName().equals("trkpt")) { // 判断开始标签元素是否是book
                                 point = new Point();
-                                point.setLatitude(Float.valueOf(xmlParser.getAttributeValue(null,"lat")));
-                                point.setLongitude(Float.valueOf(xmlParser.getAttributeValue(null,"lon")));
+                                point.setLatitude(Double.valueOf(xmlParser.getAttributeValue(null,"lat")));
+                                point.setLongitude(Double.valueOf(xmlParser.getAttributeValue(null,"lon")));
                             } else if (xmlParser.getName().equals("time")) {
                                 eventType = xmlParser.next();//让解析器指向name属性的值
                                 // 得到name标签的属性值，并设置beauty的name
-                                point.setTime(Long.valueOf(xmlParser.getText()));
+                                point.setTime(TimeUtils.GPXconvertToMil(xmlParser.getText()));
                             }
                             break;
                         // 判断当前事件是否为标签元素结束事件

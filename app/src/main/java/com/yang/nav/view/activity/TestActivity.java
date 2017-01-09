@@ -132,11 +132,11 @@ public class TestActivity extends AppCompatActivity implements OnDateSetListener
 
         switch(timePickerView.getTag()){
             case "start":
-                String start = TimeUtils.convertToStr(seconds);
+                String start = TimeUtils.convertToNormalStr(seconds);
                 et_start.setText(start);
                 break;
             case "end":
-                String end = TimeUtils.convertToStr(seconds);
+                String end = TimeUtils.convertToNormalStr(seconds);
                 et_end.setText(end);
                 break;
             default:
@@ -161,7 +161,7 @@ public class TestActivity extends AppCompatActivity implements OnDateSetListener
                 end = TimeUtils.convertToMil(et_end.getText().toString());
                 List<Point> points = new ArrayList<Point>();
                 for (int i = 0; i < 10000; i++) {
-                    points.add(new Point(null,1,1,random(start,end)));
+                    points.add(new Point(null,1D,1D,random(start,end)));
                 }
                 if(pointManager.insertMultObject(points)){
                     ToastUtils.showToast(TestActivity.this,"插入成功");

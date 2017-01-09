@@ -19,8 +19,8 @@
         android:orientation="horizontal">
         <ImageView
             android:src="@mipmap/bg_plane_model"
-            android:layout_width="60dp"
-            android:layout_height="60dp" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
         <TextView
             android:layout_marginLeft="40dp"
             android:layout_gravity="center"
@@ -30,7 +30,6 @@
             android:textStyle="bold"
             android:text="@string/plane_model"/>
     </LinearLayout>
-
     <LinearLayout
         android:id="@+id/ll_work"
         android:layout_marginTop="50dp"
@@ -39,8 +38,8 @@
         android:orientation="horizontal">
         <ImageView
             android:src="@mipmap/bg_work_model"
-            android:layout_width="60dp"
-            android:layout_height="60dp" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
         <TextView
             android:layout_marginLeft="40dp"
             android:layout_gravity="center"
@@ -58,8 +57,8 @@
         android:orientation="horizontal">
         <ImageView
             android:src="@mipmap/bg_data_model"
-            android:layout_width="60dp"
-            android:layout_height="60dp" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
         <TextView
             android:layout_marginLeft="40dp"
             android:layout_gravity="center"

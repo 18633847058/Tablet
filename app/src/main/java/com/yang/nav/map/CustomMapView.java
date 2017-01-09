@@ -2,6 +2,7 @@ package com.yang.nav.map;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.location.LocationManager;
@@ -39,6 +40,7 @@ import com.mapbar.navi.NaviSpeaker;
 import com.mapbar.navi.RouteBase;
 import com.mapbar.navi.RouteCollection;
 import com.mapbar.navi.RoutePlan;
+import com.yang.nav.R;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -52,14 +54,12 @@ public class CustomMapView extends MapView {
 			0xff0000aa, 0xff4578fc };
 	// 小车
 	private IconOverlay mCarIcon = null;
-	private ModelOverlay mCarOverlay = null;
 	// 电子眼
 	private Annotation[] mCameraAnnotations = null;
 	// 箭头
 	private ArrowOverlay mArrowOverlay = null;
 	// 小车状态
 	private boolean mIsLockedCar = false;
-	private float mCarOriented = 0.0f;
 	private Point mCarPosition = null;
 	// 路线计划
 	private RoutePlan mRoutePlan = null;
@@ -78,10 +78,10 @@ public class CustomMapView extends MapView {
 	private MapRenderer mRenderer = null;
 
 	private static final float ZOOM_STEP = 0.5f;
+
 	private Vector2DF mZoomLevelRange = null;
 	private static final int BITMAP_WIDTH = 480;
 	private static final int BITMAP_HEIGHT = 480;
-
 	public static Point mClickPoint = null;
 
 	public boolean isInited() {
@@ -95,7 +95,7 @@ public class CustomMapView extends MapView {
 	}
 
 	// TODO: 拋出異常
-	
+
 	public CustomMapView(Context context) {
 		super(context);
 		init(context);
@@ -105,7 +105,7 @@ public class CustomMapView extends MapView {
 		super(context, attrs);
 		init(context);
 	}
-	
+
 	public void setZoomHandler (Handler handler) {
 		mHandler = handler;
 	}
@@ -122,33 +122,23 @@ public class CustomMapView extends MapView {
 			mClickPoint = new Point(mRenderer.getWorldCenter());
 			Vector2DF pivot = new Vector2DF(0.5f, 0.82f);
 			// 初始化Overlay和Annotation 添加车标
-			mCarIcon = new IconOverlay("res/cars.png", true);
-			mCarIcon.markAsAnimated(4,
-					"a1000;b30;c30;d30;c40;b60;a200;b30;c30;d30;c40;b60;");
+			mCarIcon = new IconOverlay(BitmapFactory.decodeStream(getResources().openRawResource(R.mipmap.ic_current_location)), true);
 			mCarIcon.setPosition(mClickPoint);
 			mCarIcon.setOrientAngle(0.0f);
 			mRenderer.addOverlay(mCarIcon);
-
-//			mCarOverlay = new ModelOverlay(NaviCoreUtil.buildPathInPacket("models/car_model.obj"), true);
-//
-//			mCarOverlay.setScaleFactor(0.3f);
-//			mCarOverlay.setPosition(mClickPoint);
-//			mCarOverlay.setHeading(0);
-//			mRenderer.addOverlay(mCarOverlay);
 
 			// 添加点击气泡
 			mPoiAnnotation = new Annotation(2, mClickPoint, 1101, pivot);
 			mPositionAnnotation = new Annotation(2, mClickPoint, 1101, pivot);
 			CalloutStyle calloutStyle = mPoiAnnotation.getCalloutStyle();
 			calloutStyle.anchor.set(0.5f, 0.0f);
-			//calloutStyle.leftIcon = 101;
 			calloutStyle.rightIcon = 1001;
 			mPoiAnnotation.setCalloutStyle(calloutStyle);
-			mPositionAnnotation.setTitle("选取点");
+			mPositionAnnotation.setTitle("当前点");
 			mPositionAnnotation.setCalloutStyle(calloutStyle);
 			mRenderer.addAnnotation(mPoiAnnotation);
 			mRenderer.addAnnotation(mPositionAnnotation);
-			showAnnotation(null);
+//			showAnnotation(null);
 
 			// 电子眼
 			mCameraAnnotations = new Annotation[CAMERAS_MAX];
@@ -161,7 +151,7 @@ public class CustomMapView extends MapView {
 			}
 
 			// 实例化路线计划
-			mRoutePlan = new RoutePlan();
+//			mRoutePlan = new RoutePlan();
 			mInited = true;
 			//创建完毕通知
 			if(mHandler!=null){
@@ -441,8 +431,7 @@ public class CustomMapView extends MapView {
 	 */
 	private void backupMapStateBeforeSimulation() {
 		mMapState = mRenderer.getMapState();
-		mCarPosition = mCarOverlay.getPosition();
-		mCarOriented = mCarOverlay.getHeading();
+		mCarPosition = mCarIcon.getPosition();
 	}
 
 	/**
@@ -450,8 +439,7 @@ public class CustomMapView extends MapView {
 	 */
 	private void resetMapStateAfterSimulation() {
 		mRenderer.setMapState(mMapState);
-		mCarOverlay.setPosition(mCarPosition);
-		mCarOverlay.setHeading((int)mCarOriented);
+		mCarIcon.setPosition(mCarPosition);
 	}
 
 	/**
@@ -507,8 +495,7 @@ public class CustomMapView extends MapView {
 		if (lock != mIsLockedCar) {
 			mIsLockedCar = lock;
 			if (mIsLockedCar) {
-				mRenderer.setWorldCenter(mCarOverlay.getPosition());
-				mRenderer.setHeading(360.0f - mCarOverlay.getHeading());
+				mRenderer.setWorldCenter(mCarIcon.getPosition());
 				mRenderer.setViewShift(0.3f);
 			}
 		}
@@ -530,8 +517,8 @@ public class CustomMapView extends MapView {
 	 *            车所在位置
 	 */
 	public void setCarPosition(Point point) {
-		if (mCarOverlay != null) {
-			mCarOverlay.setPosition(point);
+		if (mCarIcon != null) {
+			mCarIcon.setPosition(point);
 		}
 		if (mIsLockedCar && mRenderer != null) {
 			mRenderer.setWorldCenter(point);
@@ -544,20 +531,7 @@ public class CustomMapView extends MapView {
 	 * @return 车当前的位置坐标
 	 */
 	public Point getCarPosition() {
-		return mCarOverlay.getPosition();
-	}
-
-	/**
-	 * 设置当前车的角度，用于导航时更新车的角度
-	 * 
-	 * @param ori
-	 *            车的角度
-	 */
-	public void setCarOriented(float ori) {
-		mCarOverlay.setHeading((int)ori);
-		if (mIsLockedCar) {
-			mRenderer.setHeading(360.0f - ori);
-		}
+		return mCarIcon.getPosition();
 	}
 
 	/**
@@ -577,15 +551,6 @@ public class CustomMapView extends MapView {
 	}
 
 	/**
-	 * 获取当前车的角度
-	 * 
-	 * @return 车的较粗
-	 */
-	public float getCarOriented() {
-		return (float)mCarOverlay.getHeading();
-	}
-
-	/**
 	 * 删除路线
 	 */
 	public void removeRoute() {
@@ -595,7 +560,7 @@ public class CustomMapView extends MapView {
 
 	/**
 	 * 绘制路线
-	 * 
+	 *
 	 * @param routeBase
 	 *            路线对应的RouteBase
 	 * @param isTmc
@@ -648,7 +613,7 @@ public class CustomMapView extends MapView {
 	 * @param zoomOut
 	 *            缩小按钮
 	 */
-	public void mapZoomIn(ImageView zoomIn, ImageView zoomOut) {
+	public void mapZoomIn(View zoomIn, View zoomOut) {
 		float zoomLevel = mRenderer.getZoomLevel();
 		if (mZoomLevelRange == null) {
 			mZoomLevelRange = mRenderer.getZoomLevelRange();
@@ -672,7 +637,7 @@ public class CustomMapView extends MapView {
 	 * @param zoomOut
 	 *            缩小按钮
 	 */
-	public void mapZoomOut(ImageView zoomIn, ImageView zoomOut) {
+	public void mapZoomOut(View zoomIn, View zoomOut) {
 		float zoomLevel = mRenderer.getZoomLevel();
 		if (mZoomLevelRange == null) {
 			mZoomLevelRange = mRenderer.getZoomLevelRange();
@@ -719,7 +684,7 @@ public class CustomMapView extends MapView {
 		super.onCameraChanged(changeTye);
 		MapRenderer render = getMapRenderer();
 		if(render != null){
-			if(changeTye == MapRenderer.CameraSetting.zoomLevel+MapRenderer.CameraSetting.scale){
+			if(changeTye == MapRenderer.CameraSetting.zoomLevel + MapRenderer.CameraSetting.scale){
 				//地图缩放
 				zoomChange();
 			}
@@ -792,6 +757,7 @@ public class CustomMapView extends MapView {
 				@Override
 				public boolean onScroll(MotionEvent arg0, MotionEvent arg1,
 						float arg2, float arg3) {
+					onScrollListener.onScroll();
 					return false;
 				}
 
@@ -822,4 +788,12 @@ public class CustomMapView extends MapView {
 					return false;
 				}
 			});
+	public interface OnScrollListener{
+		public void onScroll();
+	}
+	private OnScrollListener onScrollListener = null;
+
+	public void setOnFlingListener(OnScrollListener onScrollListener) {
+		this.onScrollListener = onScrollListener;
+	}
 }

@@ -134,11 +134,11 @@ public class DataManagerActivity extends AppCompatActivity implements View.OnCli
     public void onDateSet(TimePickerDialog timePickerView, long seconds) {
         switch(timePickerView.getTag()){
             case "start":
-                String start = TimeUtils.convertToStr(seconds);
+                String start = TimeUtils.convertToNormalStr(seconds);
                 et_start.setText(start);
                 break;
             case "end":
-                String end = TimeUtils.convertToStr(seconds);
+                String end = TimeUtils.convertToNormalStr(seconds);
                 et_end.setText(end);
                 break;
             default:

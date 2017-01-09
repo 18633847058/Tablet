@@ -16,16 +16,18 @@ public class Point {
     private Long id = null;
     //经度
     @NotNull
-    private float longitude;
+    private Double longitude;
     //纬度
     @NotNull
-    private float latitude;
+    private Double latitude;
     //时间
     @NotNull
     private Long time;
 
-    @Generated(hash = 1393679492)
-    public Point(Long id, float longitude, float latitude, @NotNull Long time) {
+
+    @Generated(hash = 959848393)
+    public Point(Long id, @NotNull Double longitude, @NotNull Double latitude,
+            @NotNull Long time) {
         this.id = id;
         this.longitude = longitude;
         this.latitude = latitude;
@@ -36,13 +38,14 @@ public class Point {
     public Point() {
     }
     
+    
     @Override
     public String toString() {
         return "Point{" +
                 "id=" + id +
                 ", longitude=" + longitude +
                 ", latitude=" + latitude +
-                ", time='" + TimeUtils.convertToStr(time) + '\'' +
+                ", time='" + TimeUtils.convertToNormalStr(time) + '\'' +
                 '}';
     }
 
@@ -54,19 +57,19 @@ public class Point {
         this.id = id;
     }
 
-    public float getLongitude() {
+    public Double getLongitude() {
         return this.longitude;
     }
 
-    public void setLongitude(float longitude) {
+    public void setLongitude(Double longitude) {
         this.longitude = longitude;
     }
 
-    public float getLatitude() {
+    public Double getLatitude() {
         return this.latitude;
     }
 
-    public void setLatitude(float latitude) {
+    public void setLatitude(Double latitude) {
         this.latitude = latitude;
     }
 

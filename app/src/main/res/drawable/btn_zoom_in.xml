@@ -4,7 +4,7 @@
 	>
 	<item
 		android:state_enabled="false"
-		android:drawable="@mipmap/btn_zoom_in_disabled"
+		android:drawable="@mipmap/btn_zoom_in_disable"
 		>
 	</item>
 	<item
