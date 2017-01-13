@@ -1,17 +1,31 @@
 package com.yang.nav.model.entity;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.yang.nav.utils.TimeUtils;
 
 import org.greenrobot.greendao.annotation.Entity;
+import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.NotNull;
-import org.greenrobot.greendao.annotation.Generated;
 
 /**
  * Created by Yang on 2016/12/14.
  */
 @Entity
-public class Point {
+public class Point implements Parcelable {
+    public static final Creator<Point> CREATOR = new Creator<Point>() {
+        @Override
+        public Point createFromParcel(Parcel in) {
+            return new Point(in);
+        }
+
+        @Override
+        public Point[] newArray(int size) {
+            return new Point[size];
+        }
+    };
     @Id(autoincrement = true)
     private Long id = null;
     //经度
@@ -23,29 +37,41 @@ public class Point {
     //时间
     @NotNull
     private Long time;
+    //速度
+    @NotNull
+    private Double speed;
 
-
-    @Generated(hash = 959848393)
+    @Generated(hash = 1493700571)
     public Point(Long id, @NotNull Double longitude, @NotNull Double latitude,
-            @NotNull Long time) {
+                 @NotNull Long time, @NotNull Double speed) {
         this.id = id;
         this.longitude = longitude;
         this.latitude = latitude;
         this.time = time;
+        this.speed = speed;
     }
+
 
     @Generated(hash = 1977038299)
     public Point() {
     }
-    
-    
+
+    protected Point(Parcel in) {
+        this.id = in.readLong();
+        this.time = in.readLong();
+        this.longitude = in.readDouble();
+        this.latitude = in.readDouble();
+        this.speed = in.readDouble();
+    }
+
     @Override
     public String toString() {
         return "Point{" +
                 "id=" + id +
                 ", longitude=" + longitude +
                 ", latitude=" + latitude +
-                ", time='" + TimeUtils.convertToNormalStr(time) + '\'' +
+                ", speed=" + speed +
+                ", time='" + TimeUtils.convertToStr(time, "yyyy-MM-dd HH:mm:ss") + '\'' +
                 '}';
     }
 
@@ -79,5 +105,27 @@ public class Point {
 
     public void setTime(Long time) {
         this.time = time;
+    }
+
+    public Double getSpeed() {
+        return this.speed;
+    }
+
+    public void setSpeed(Double speed) {
+        this.speed = speed;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(id);
+        dest.writeLong(time);
+        dest.writeDouble(longitude);
+        dest.writeDouble(latitude);
+        dest.writeDouble(speed);
     }
 }

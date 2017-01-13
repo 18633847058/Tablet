@@ -16,30 +16,38 @@ public class GgaNmeaCodec extends AbstractNmeaSentenceCodec{
 		//增加观察者
 		this.addObserver(new ObserverPrintMsg());
 	}
+
+	public static void main(String[] args) throws Exception {
+		GgaNmeaCodec anc = new GgaNmeaCodec();
+//		String content = "$GNGGA,,,,,,0,00,99.99,,,,,,*56";
+		String content = "$GPGGA,161229.487,3723.2475,N,12158.3416,W,1,07,1.0,9.0,M, , ,,0000*18";
+		anc.decode(content);
+	}
+
 	@Override
-	//$GPGGA,<1>,<2>,<3>,<4>,<5>,<6>,<7>,<8>,<9>,<10>,<11>,<12>,<13>,<14>*hh<CR><LF>  
+	//$GPGGA,<1>,<2>,<3>,<4>,<5>,<6>,<7>,<8>,<9>,<10>,<11>,<12>,<13>,<14>*hh<CR><LF>
 	public void decode(String content) throws Exception {
 		nmeaObject = new GgaNmeaObject();
 		if(!AbstractNmeaObject.GGA_PROTOL.equals(getContentType(content))){
 			throw new Exception("不是GGA语句");
 		}
-		
+
 		String msgChecksum = getStringChecksum(getChecksum(content));
 		System.out.println(msgChecksum);
-		
+
 		//求出数据字符串长度
 		int len = content.length();
 		while (len > 0 && (content.charAt(len - 1) == '\r' || content.charAt(len - 1) == '\n')) {
 			len--;
         }
-		
+
 		String checksum = null;
 		//$GPGGA,161229.487,3723.2475,N,12158.3416,W,1,07,1.0,9.0,M, , ,,0000
 		List<String> fileds = new ArrayList<String>();
 		int pos = 0;
 		for (int i = 0; i < len; i++) {
 			char ch = content.charAt(i);
-			
+
 			if(ch ==','){
 				fileds.add(StringUtils.substring(content, pos, i));
 				pos = i + 1;
@@ -51,17 +59,17 @@ public class GgaNmeaCodec extends AbstractNmeaSentenceCodec{
 				break;
 			}
 		}
-		
-		if(!StringUtils.isEmpty(checksum)&&!checksum.equals(msgChecksum)){
-			throw new Exception("数据校验和有误");
-		}
+		//判断校验和
+//		if(!StringUtils.isEmpty(checksum)&&!checksum.equals(msgChecksum)){
+//			throw new Exception("数据校验和有误");
+//		}
 		nmeaObject.setMsgChecksum(msgChecksum);
 		nmeaObject.setMsgFields(fileds);
 		nmeaObject.setMsgId(fileds.get(0));//$GPGGA
-		
+
 		setChanged();
 		notifyObservers(nmeaObject);
-		
+
 		encode(nmeaObject);
 	}
 
@@ -83,15 +91,5 @@ public class GgaNmeaCodec extends AbstractNmeaSentenceCodec{
 		content.append("\n");
 		msg.add(content.toString());
 		return msg;
-	}
-	
-	
-	
-	
-	public static void main(String[] args) throws Exception {
-		GgaNmeaCodec anc = new GgaNmeaCodec();
-//		String content = "$GNGGA,,,,,,0,00,99.99,,,,,,*56";
-		String content = "$GPGGA,161229.487,3723.2475,N,12158.3416,W,1,07,1.0,9.0,M, , ,,0000*18";
-		anc.decode(content);
 	}
 }

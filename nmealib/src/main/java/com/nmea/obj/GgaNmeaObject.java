@@ -6,10 +6,6 @@ import org.apache.commons.lang.StringUtils;
 
 public class GgaNmeaObject extends AbstractNmeaObject {
 
-	public GgaNmeaObject() {
-		this.objType = GGA_PROTOL;
-	}
-	
 	//1.UTC时间，格式为hhmmss.sss
 	private String utc_Time;
 	//2.纬度，格式为ddmm.mmmm(第一位是零也将传送)；
@@ -36,9 +32,21 @@ public class GgaNmeaObject extends AbstractNmeaObject {
 	private String expired;
 	//14.差分参考基站标号，从0000到1023(首位0也将传送)
 	private String code;
-	/* (non-Javadoc)
+
+    public GgaNmeaObject() {
+        this.objType = GGA_PROTOL;
+    }
+    /* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
+
+    public int getGpa_flag() {
+        return gpa_flag;
+    }
+
+    public void setGpa_flag(int gpa_flag) {
+        this.gpa_flag = gpa_flag;
+    }
 
 	public String getUtc_Time() {
 		return utc_Time;
@@ -69,7 +77,10 @@ public class GgaNmeaObject extends AbstractNmeaObject {
 		if(this.msgFields == null || this.msgFields.size()< 15){
 			return "数据格式有误";
 		}
-		StringBuffer str = new StringBuffer();
+        if (!this.msgFields.get(6).isEmpty() && "0".equals(this.msgFields.get(6))) {
+            return "未定位";
+        }
+        StringBuffer str = new StringBuffer();
 		str.append("GGA消息:");
 
 		str.append("定位点的UTC时间：");
@@ -119,16 +130,20 @@ public class GgaNmeaObject extends AbstractNmeaObject {
 
 		str.append(",GPS定位状态指示:");
 		if(!this.msgFields.get(6).isEmpty()&&"0".equals(this.msgFields.get(6))){
-			str.append("未定位");
+            setGpa_flag(Integer.parseInt(this.msgFields.get(6)));
+            str.append("未定位");
 		}
 		if(!this.msgFields.get(6).isEmpty()&&"1".equals(this.msgFields.get(6))){
-			str.append("无差分，SPS模式，定位有效");
+            setGpa_flag(Integer.parseInt(this.msgFields.get(6)));
+            str.append("无差分，SPS模式，定位有效");
 		}
 		if(!this.msgFields.get(6).isEmpty()&&"2".equals(this.msgFields.get(6))){
-			str.append("带差分，SPS模式，定位有效");
+            setGpa_flag(Integer.parseInt(this.msgFields.get(6)));
+            str.append("带差分，SPS模式，定位有效");
 		}
 		if(!this.msgFields.get(6).isEmpty()&&"3".equals(this.msgFields.get(6))){
-			str.append("PPS模式，定位有效");
+            setGpa_flag(Integer.parseInt(this.msgFields.get(6)));
+            str.append("PPS模式，定位有效");
 		}
 		if(!this.msgFields.get(7).isEmpty()) {
 			str.append(",使用卫星数量:");
@@ -160,6 +175,5 @@ public class GgaNmeaObject extends AbstractNmeaObject {
 
 
 		return str.toString();
-//		return "111111";
 	}
 }

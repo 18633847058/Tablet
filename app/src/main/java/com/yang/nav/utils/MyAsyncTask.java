@@ -4,13 +4,17 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Bundle;
 
 import com.yang.nav.model.PointManager;
 import com.yang.nav.model.entity.Point;
-import com.yang.nav.view.activity.MapViewActivity;
+import com.yang.nav.view.activity.DataManagerActivity;
+import com.yang.nav.view.activity.TrackReviewActivity;
 
 import java.lang.ref.WeakReference;
-import java.util.List;
+import java.util.ArrayList;
+
+import static com.yang.nav.view.activity.DataManagerActivity.points;
 
 /**
  * Created by Yang on 2016/12/22.
@@ -18,23 +22,12 @@ import java.util.List;
 
 public class MyAsyncTask extends AsyncTask <MyAsyncTask.Type,Integer,MyAsyncTask.Message> {
 
+    Type type;
     private WeakReference<Context> weakReference;
     private PointManager pointManager;
     private String startTime;
     private String endTime;
     private String file;
-    Type type;
-    private List<Point> points;
-
-//    public interface OnQueryListener{
-//        void onQuery(List<Point> list);
-//    }
-    public enum Type {
-        DELETE, REVIEW, EXPORT, IMPORT, INSERT
-    }
-    public enum Message {
-        SUCCESS, FAILURE, NULL,
-    }
 
     public MyAsyncTask(Context context,PointManager pointManager) {
         weakReference = new WeakReference<>(context);
@@ -77,6 +70,15 @@ public class MyAsyncTask extends AsyncTask <MyAsyncTask.Type,Integer,MyAsyncTask
         super.onPostExecute(m);
         DialogUtils.hideLoadingDialog();
         switch (type){
+            case SELECT:
+                if (m == Message.SUCCESS) {
+                    ToastUtils.showToast(weakReference.get(), "查找成功！");
+                    DataManagerActivity activity = (DataManagerActivity) weakReference.get();
+                    activity.setVisibility(true, points.size());
+                } else {
+                    ToastUtils.showToast(weakReference.get(), "查找失败！");
+                }
+                break;
             case DELETE:
                 if(m == Message.SUCCESS){
                     ToastUtils.showToast(weakReference.get(),"删除成功！");
@@ -85,12 +87,20 @@ public class MyAsyncTask extends AsyncTask <MyAsyncTask.Type,Integer,MyAsyncTask
                 }
                 break;
             case EXPORT:
-                if (m == Message.NULL){
-                    ToastUtils.showToast(weakReference.get(),"查询结果为空！");
-                }else if(m == Message.SUCCESS){
+                if (m == Message.SUCCESS) {
                     ToastUtils.showToast(weakReference.get(),"导出成功！");
                 }else{
-                    ToastUtils.showToast(weakReference.get(),"出现错误导出失败！");
+                    ToastUtils.showToast(weakReference.get(), "导出失败！");
+                }
+                break;
+            case REVIEW:
+                if (m == Message.SUCCESS) {
+                    ToastUtils.showToast(weakReference.get().getApplicationContext(), "数据传输中，正在转入地图！");
+                    Intent intent = new Intent(weakReference.get(), TrackReviewActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putParcelableArrayList("points", points);
+                    intent.putExtras(bundle);
+                    weakReference.get().startActivity(intent);
                 }
                 break;
             case IMPORT:
@@ -105,59 +115,71 @@ public class MyAsyncTask extends AsyncTask <MyAsyncTask.Type,Integer,MyAsyncTask
             case INSERT:
 
                 break;
-            case REVIEW:
-                if (m == Message.NULL){
-                    ToastUtils.showToast(weakReference.get(),"查询数据为空！");
-                }else if(m == Message.SUCCESS) {
-                    ToastUtils.showToast(weakReference.get(), "数据查询到，正在转入地图！");
-                    weakReference.get().startActivity(new Intent(weakReference.get(), MapViewActivity.class));
-                }
-                break;
+
         }
     }
-
 
     private Message worker(MyAsyncTask.Type type) {
         Message message = Message.FAILURE;
         switch (type){
+            case SELECT:
+                DataManagerActivity.points = (ArrayList<Point>) pointManager.getPointsByTime(startTime, endTime);
+                if (points == null) {
+                    message = Message.NULL;
+                } else {
+                    message = Message.SUCCESS;
+                }
+                break;
             case DELETE:
-                if(pointManager.deletePointsByTime(startTime,endTime)){
-                   message = Message.SUCCESS;
+                if (points != null) {
+                    if (pointManager.deleteMultObject(points, Point.class)) {
+                        message = Message.SUCCESS;
+                    }
                 }
                 break;
             case EXPORT:
-                points = pointManager.getPointsByTime(startTime,endTime);
                 if (points != null) {
                     XmlUtils.XmlFileCreator(points);
                     message = Message.SUCCESS;
-                }else {
-                    message = Message.NULL;
                 }
                 break;
+
+            case INSERT:
+
+                break;
+            case REVIEW:
+                if (points != null) {
+                    message = Message.SUCCESS;
+                }
+                break;
+
+
+
+
             case IMPORT:
-                points = XmlUtils.parseXml(file);
+                points = (ArrayList<Point>) XmlUtils.parseXml(file);
                 if (points == null){
                     message = Message.NULL;
                     break;
                 }
                 if(pointManager.insertMultObject(points)){
                     message = Message.SUCCESS;
+                    points = null;
                 }else{
                     message = Message.FAILURE;
-                }
-                break;
-            case INSERT:
-
-                break;
-            case REVIEW:
-                points = pointManager.getPointsByTime(startTime,endTime);
-                if (points != null) {
-                    message = Message.SUCCESS;
-                }else {
-                    message = Message.NULL;
+                    points = null;
                 }
                 break;
         }
         return message;
+    }
+
+    public enum Type {
+        DELETE, REVIEW, EXPORT, IMPORT, INSERT, SELECT
+    }
+
+
+    public enum Message {
+        SUCCESS, FAILURE, NULL,
     }
 }

@@ -14,6 +14,7 @@ public abstract class AbstractNmeaObject {
 	public static final String GYR_PROTOL = "GYR";
 	
 	protected String msgId;
+	protected String type;
 	
 	protected String msgChecksum;
     protected String msg;
@@ -35,6 +36,11 @@ public abstract class AbstractNmeaObject {
 	 */
 	public void setMsgId(String msgId) {
 		this.msgId = msgId;
+		this.type = msgId.substring(1, 3);
+	}
+
+	public String getType() {
+		return type;
 	}
 
 	/**

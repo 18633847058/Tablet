@@ -22,7 +22,9 @@ import java.util.List;
  */
 
 public class XmlUtils {
+    public static final String SF = "yyyy-MM-dd'T'HH:mm:ss'Z'";
     private static final String NAME_SPACE = "http://www.topografix.com/GPX/1/1";
+
     public static void XmlFileCreator(List<Point> pointList){
         File newXmlFile = new File("/storage/sdcard0/mapbar/app/test.gpx");
         try{
@@ -56,7 +58,7 @@ public class XmlUtils {
                 serializer.attribute(null,"lat",point.getLatitude()+"");
                 serializer.attribute(null,"lon",point.getLongitude()+"");
                 serializer.startTag(null,"time");
-                serializer.text(TimeUtils.convertToGPXStr(point.getTime()));
+                serializer.text(TimeUtils.convertToStr(point.getTime(), SF));
                 serializer.endTag(null,"time");
                 serializer.endTag(null,"trkpt");
             }
@@ -105,7 +107,7 @@ public class XmlUtils {
                             } else if (xmlParser.getName().equals("time")) {
                                 eventType = xmlParser.next();//让解析器指向name属性的值
                                 // 得到name标签的属性值，并设置beauty的name
-                                point.setTime(TimeUtils.GPXconvertToMil(xmlParser.getText()));
+                                point.setTime(TimeUtils.convertToMil(xmlParser.getText(), SF));
                             }
                             break;
                         // 判断当前事件是否为标签元素结束事件

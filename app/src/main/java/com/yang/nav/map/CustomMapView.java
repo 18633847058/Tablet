@@ -27,7 +27,6 @@ import com.mapbar.map.IconOverlay;
 import com.mapbar.map.MapRenderer;
 import com.mapbar.map.MapState;
 import com.mapbar.map.MapView;
-import com.mapbar.map.ModelOverlay;
 import com.mapbar.map.RouteOverlay;
 import com.mapbar.map.Vector2DF;
 import com.mapbar.mapdal.PoiFavorite;
@@ -46,12 +45,17 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 public class CustomMapView extends MapView {
-	private Context mContext;
 	private static final int CAMERAS_MAX = 16;
-	private boolean mInited = false;
-	public Handler mHandler;
 	private static final int[] mRouteOverlayColors = { 0xffaa0000, 0xff00aa00,
 			0xff0000aa, 0xff4578fc };
+	private static final float ZOOM_STEP = 0.5f;
+	private static final int BITMAP_WIDTH = 480;
+	private static final int BITMAP_HEIGHT = 480;
+	public static Point mClickPoint = null;
+	public Handler mHandler;
+	public Bitmap mBitmap = null;
+	private Context mContext;
+	private boolean mInited = false;
 	// 小车
 	private IconOverlay mCarIcon = null;
 	// 电子眼
@@ -70,29 +74,60 @@ public class CustomMapView extends MapView {
 	private int mRouteOverlayNumber = 0;
 	// 用来绘制放大图
 	private ImageView mExpandView = null;
-	public Bitmap mBitmap = null;
 	// 选中的POI
 	private Annotation mPoiAnnotation = null;
 	private Annotation mPositionAnnotation = null;
-
 	private MapRenderer mRenderer = null;
-
-	private static final float ZOOM_STEP = 0.5f;
-
 	private Vector2DF mZoomLevelRange = null;
-	private static final int BITMAP_WIDTH = 480;
-	private static final int BITMAP_HEIGHT = 480;
-	public static Point mClickPoint = null;
+	private OnScrollListener onScrollListener = null;
+	@SuppressWarnings("deprecation")
+	private GestureDetector mGestureDetector = new GestureDetector(
+			new OnGestureListener() {
 
-	public boolean isInited() {
-		return mInited;
-	}
+				@Override
+				public boolean onSingleTapUp(MotionEvent arg0) {
+					return false;
+				}
 
-	private void init(Context context) {
-		mContext = context;
-		mIsLockedCar = true;
-		mRouteCollectionOverlays = new RouteOverlay[4];
-	}
+				@Override
+				public void onShowPress(MotionEvent arg0) {
+
+				}
+
+				@Override
+				public boolean onScroll(MotionEvent arg0, MotionEvent arg1,
+										float arg2, float arg3) {
+					onScrollListener.onScroll();
+					return false;
+				}
+
+				@Override
+				public void onLongPress(MotionEvent event) {
+					int pointerCount = event.getPointerCount();
+					if (pointerCount == 1) {
+						MapRenderer mr = mRenderer;
+						Point point = mRenderer.screen2World(new PointF(event
+								.getX(), event.getY()));
+						mClickPoint.set(point.x, point.y);
+						mPositionAnnotation.setPosition(mClickPoint);
+						showAnnotation(mPositionAnnotation);
+						mr.beginAnimations();
+						mr.setWorldCenter(mClickPoint);
+						mr.commitAnimations(500, MapRenderer.Animation.linear);
+					}
+				}
+
+				@Override
+				public boolean onFling(MotionEvent arg0, MotionEvent arg1,
+									   float arg2, float arg3) {
+					return false;
+				}
+
+				@Override
+				public boolean onDown(MotionEvent arg0) {
+					return false;
+				}
+			});
 
 	// TODO: 拋出異常
 
@@ -104,6 +139,16 @@ public class CustomMapView extends MapView {
 	public CustomMapView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		init(context);
+	}
+
+	public boolean isInited() {
+		return mInited;
+	}
+
+	private void init(Context context) {
+		mContext = context;
+		mIsLockedCar = true;
+		mRouteCollectionOverlays = new RouteOverlay[4];
 	}
 
 	public void setZoomHandler (Handler handler) {
@@ -118,7 +163,7 @@ public class CustomMapView extends MapView {
 			mRenderer = super.getMapRenderer();
 			if(mRenderer == null)
 				return;
-			mRenderer.setWorldCenter(Config.centerPoint);
+			mRenderer.setWorldCenter(new Point(11400000, 3800000));
 			mClickPoint = new Point(mRenderer.getWorldCenter());
 			Vector2DF pivot = new Vector2DF(0.5f, 0.82f);
 			// 初始化Overlay和Annotation 添加车标
@@ -162,7 +207,7 @@ public class CustomMapView extends MapView {
 
 	/**
 	 * 初始化放大图绘制使用的view
-	 * 
+	 *
 	 * @param view
 	 */
 	public void setExpandView(ImageView view) {
@@ -223,7 +268,7 @@ public class CustomMapView extends MapView {
 			mArrowOverlay = null;
 		}
 	}
-	
+
 	/**
 	 * 绘制指定Maneuver的箭头
 	 *
@@ -240,10 +285,10 @@ public class CustomMapView extends MapView {
 		}
 		arrowInfo = null;
 	}
-	
+
 	/**
 	 * 绘制摄像头
-	 * 
+	 *
 	 * @param cameras
 	 *            需要绘制的摄像头数组
 	 */
@@ -264,7 +309,7 @@ public class CustomMapView extends MapView {
 
 	/**
 	 * 绘制出多条路线
-	 * 
+	 *
 	 * @param routeCollection
 	 */
 	public void drawRoutes(RouteCollection routeCollection, int routeIndex) {
@@ -286,7 +331,7 @@ public class CustomMapView extends MapView {
 
 	/**
 	 * 绘制单挑条路线
-	 * 
+	 *
 	 * @param routeBase
 	 */
 	public void drawRoutes(RouteBase routeBase,boolean isTmc) {
@@ -306,7 +351,7 @@ public class CustomMapView extends MapView {
 		// 默认将一条路线画到地图上
 		mRenderer.addOverlay(mRouteCollectionOverlays[0]);
 	}
-	
+
 	/**
 	 * 设置路线是否开启Tmc模式
 	 */
@@ -323,7 +368,7 @@ public class CustomMapView extends MapView {
 
 	/**
 	 * 将路线显示在地图上
-	 * 
+	 *
 	 * @param index
 	 */
 	public void drawRouteToMap(int index) {
@@ -402,8 +447,7 @@ public class CustomMapView extends MapView {
 			// mIsAnnotationDisplaying = true;
 		}
 	}
-	
-	
+
 	/**
 	 * 点击poi
 	 */
@@ -444,7 +488,7 @@ public class CustomMapView extends MapView {
 
 	/**
 	 * 设置路线起点
-	 * 
+	 *
 	 * @param point
 	 *            路线起点
 	 */
@@ -457,7 +501,7 @@ public class CustomMapView extends MapView {
 
 	/**
 	 * 设置途经点
-	 * 
+	 *
 	 * @param point
 	 *            路线起点
 	 */
@@ -465,10 +509,10 @@ public class CustomMapView extends MapView {
 		PoiFavorite poi = new PoiFavorite(point);
 		mRoutePlan.addWayPoint(poi);
 	}
-	
+
 	/**
 	 * 设置目的地
-	 * 
+	 *
 	 * @param point
 	 *            目的地
 	 */
@@ -484,10 +528,9 @@ public class CustomMapView extends MapView {
 		}
 	}
 
-
 	/**
 	 * 控制是否锁车
-	 * 
+	 *
 	 * @param lock
 	 *            是否锁车，如果为true则锁车，否则不锁车
 	 */
@@ -503,7 +546,7 @@ public class CustomMapView extends MapView {
 
 	/**
 	 * 判断是否为锁车状态
-	 * 
+	 *
 	 * @return 如果锁车则返回true，否则返回false
 	 */
 	public boolean carIsLocked() {
@@ -511,8 +554,17 @@ public class CustomMapView extends MapView {
 	}
 
 	/**
+	 * 获取车当前的位置
+	 *
+	 * @return 车当前的位置坐标
+	 */
+	public Point getCarPosition() {
+		return mCarIcon.getPosition();
+	}
+
+	/**
 	 * 设置车的位置，用于在模拟导航时更新车的位置使用
-	 * 
+	 *
 	 * @param point
 	 *            车所在位置
 	 */
@@ -526,17 +578,8 @@ public class CustomMapView extends MapView {
 	}
 
 	/**
-	 * 获取车当前的位置
-	 * 
-	 * @return 车当前的位置坐标
-	 */
-	public Point getCarPosition() {
-		return mCarIcon.getPosition();
-	}
-
-	/**
 	 * 在地图指定位置显示一个POI的信息
-	 * 
+	 *
 	 * @param point
 	 *            POI所在位置
 	 * @param name
@@ -573,7 +616,7 @@ public class CustomMapView extends MapView {
 
 	/**
 	 * 将指定的路线隐藏
-	 * 
+	 *
 	 * @param index
 	 */
 	public void removeRouteOverlay(int index) {
@@ -585,7 +628,7 @@ public class CustomMapView extends MapView {
 
 	/**
 	 * 删除所有路线
-	 * 
+	 *
 	 * @param removeAll
 	 */
 	private void removeRouteOverlay(boolean removeAll) {
@@ -607,7 +650,7 @@ public class CustomMapView extends MapView {
 
 	/**
 	 * 地图放大操作
-	 * 
+	 *
 	 * @param zoomIn
 	 *            放大按钮
 	 * @param zoomOut
@@ -631,7 +674,7 @@ public class CustomMapView extends MapView {
 
 	/**
 	 * 地图缩小操作
-	 * 
+	 *
 	 * @param zoomIn
 	 *            放大按钮
 	 * @param zoomOut
@@ -655,7 +698,7 @@ public class CustomMapView extends MapView {
 
 	/**
 	 * 检查网络wifi 2G 3G网络
-	 * 
+	 *
 	 * @return TODO
 	 */
 	public boolean isOpenNet() {
@@ -668,7 +711,11 @@ public class CustomMapView extends MapView {
 		}
 		return false;
 	}
-	
+
+	// ////////////////////////////////////////////////
+	// OnTouchListener
+	// ////////////////////////////////////////////////
+
 	/**
 	 * 检查gps是否开启
 	 * @return
@@ -678,7 +725,6 @@ public class CustomMapView extends MapView {
 		return Settings.Secure.isLocationProviderEnabled(mContext.getContentResolver(), LocationManager.GPS_PROVIDER);
 	}
 	
-
 	@Override
 	public void onCameraChanged(int changeTye) {
 		super.onCameraChanged(changeTye);
@@ -690,10 +736,6 @@ public class CustomMapView extends MapView {
 			}
 		}
 	}
-	
-	// ////////////////////////////////////////////////
-	// OnTouchListener
-	// ////////////////////////////////////////////////
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
@@ -710,7 +752,7 @@ public class CustomMapView extends MapView {
 		}
 		return super.onTouch(v, event);
 	}
-	
+
 	/**
 	 * 缩放级别改变
 	 */
@@ -740,60 +782,11 @@ public class CustomMapView extends MapView {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
-	private GestureDetector mGestureDetector = new GestureDetector(
-			new OnGestureListener() {
+	public void setOnScrollListener(OnScrollListener onScrollListener) {
+		this.onScrollListener = onScrollListener;
+	}
 
-				@Override
-				public boolean onSingleTapUp(MotionEvent arg0) {
-					return false;
-				}
-
-				@Override
-				public void onShowPress(MotionEvent arg0) {
-
-				}
-
-				@Override
-				public boolean onScroll(MotionEvent arg0, MotionEvent arg1,
-						float arg2, float arg3) {
-					onScrollListener.onScroll();
-					return false;
-				}
-
-				@Override
-				public void onLongPress(MotionEvent event) {
-					int pointerCount = event.getPointerCount();
-					if (pointerCount == 1) {
-						MapRenderer mr = mRenderer;
-						Point point = mRenderer.screen2World(new PointF(event
-								.getX(), event.getY()));
-						mClickPoint.set(point.x, point.y);
-						mPositionAnnotation.setPosition(mClickPoint);
-						showAnnotation(mPositionAnnotation);
-						mr.beginAnimations();
-						mr.setWorldCenter(mClickPoint);
-						mr.commitAnimations(500, MapRenderer.Animation.linear);
-					}
-				}
-
-				@Override
-				public boolean onFling(MotionEvent arg0, MotionEvent arg1,
-						float arg2, float arg3) {
-					return false;
-				}
-
-				@Override
-				public boolean onDown(MotionEvent arg0) {
-					return false;
-				}
-			});
 	public interface OnScrollListener{
 		public void onScroll();
-	}
-	private OnScrollListener onScrollListener = null;
-
-	public void setOnFlingListener(OnScrollListener onScrollListener) {
-		this.onScrollListener = onScrollListener;
 	}
 }

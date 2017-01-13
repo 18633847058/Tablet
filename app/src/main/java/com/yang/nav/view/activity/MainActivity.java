@@ -9,7 +9,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
-import android.widget.LinearLayout;
+import android.widget.Button;
 
 import com.mapbar.license.License;
 import com.mapbar.mapdal.Auth;
@@ -18,7 +18,6 @@ import com.mapbar.mapdal.NativeEnvParams;
 import com.mapbar.mapdal.SdkAuth;
 import com.mapbar.mapdal.WorldManager;
 import com.yang.nav.R;
-import com.yang.nav.model.entity.Point;
 import com.yang.nav.utils.HandlerUtils;
 import com.yang.nav.utils.ToastUtils;
 
@@ -26,26 +25,21 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, HandlerUtils.OnReceiveMessageListener {
 
-    private LinearLayout ll_plane;
-    private LinearLayout ll_work;
-    private LinearLayout ll_data;
-    private List<Point> list;
-
-
     public static final String KEY = "jxz236-20141118-02-L-F-A11100";
+    // 调试时所使用的输出信息
+    private final static String TAG = "TestActivity";
     //应用跟目录
     private static String mAppPath = null;
     //应用名
     private static String mAppName = null;
-    // 调试时所使用的输出信息
-    private final static String TAG = "TestActivity";
     //dpi
     private static int mDensityDpi = 0;
-
+    private Button ll_plane;
+    private Button ll_work;
+    private Button ll_data;
     private HandlerUtils.HandlerHolder mHandler = new HandlerUtils.HandlerHolder(this);
 
     @Override
@@ -58,9 +52,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initView() {
-        ll_data = (LinearLayout) findViewById(R.id.ll_data);
-        ll_plane = (LinearLayout) findViewById(R.id.ll_plane);
-        ll_work = (LinearLayout) findViewById(R.id.ll_work);
+        ll_data = (Button) findViewById(R.id.ll_data);
+        ll_plane = (Button) findViewById(R.id.ll_plane);
+        ll_work = (Button) findViewById(R.id.ll_work);
         ll_plane.setOnClickListener(this);
         ll_work.setOnClickListener(this);
         ll_data.setOnClickListener(this);
@@ -73,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(new Intent(MainActivity.this,MapViewActivity.class));
                 break;
             case R.id.ll_work:
-
+                startActivity(new Intent(MainActivity.this, TestActivity.class));
                 break;
             case R.id.ll_data:
                 startActivity(new Intent(MainActivity.this,DataManagerActivity.class));
@@ -152,24 +146,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     if (License.autoActivateNew()) {
                         //license激活成功，则进行sdk授权
                         NativeEnvironmentInit(mAppName,KEY);
-                        ToastUtils.showToast(MainActivity.this,"license activity success");
+                        ToastUtils.showToast(MainActivity.this, "证书激活成功");
                     }else{
-                        ToastUtils.showToast(MainActivity.this,"license activity fail");
+                        ToastUtils.showToast(MainActivity.this, "证书激活失败");
                     }
                 }
             }
             break;
             case License.Initialize.deviceIdFailed:
                 //获取不到设备ID一般来说是MAC地址
-                ToastUtils.showToast(MainActivity.this,"deviceIdFailed");
+                ToastUtils.showToast(MainActivity.this, "获取不到Mac地址");
                 break;
             case License.Initialize.noAvailableDataPath:
                 //不存在有效的数据目录
-                ToastUtils.showToast(MainActivity.this,"noAvailableDataPath");
+                ToastUtils.showToast(MainActivity.this, "无效的数据目录");
                 break;
             case License.Initialize.otherFailed:
                 //授权验证模块初始化失败
-                ToastUtils.showToast(MainActivity.this,"otherFailed");
+                ToastUtils.showToast(MainActivity.this, "其他错误");
                 break;
             default:
                 break;

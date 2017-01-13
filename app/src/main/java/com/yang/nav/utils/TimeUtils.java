@@ -4,6 +4,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
+
 
 /**
  * Created by Yang on 2016/12/16.
@@ -11,45 +13,31 @@ import java.util.Locale;
 
 public class TimeUtils {
 
-    private static SimpleDateFormat Nor_sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
-    private static SimpleDateFormat GPX_sf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH);
-    private static SimpleDateFormat YMD_sf = new SimpleDateFormat("yyyy年MM月dd日", Locale.ENGLISH);
-    private static SimpleDateFormat sf = new SimpleDateFormat("yyyy年MM月dd日hh时mm分ss秒", Locale.ENGLISH);
-
     /**
      * 将毫秒值转化为格式化的时间字符串
      * @param millisecond
      * @return
      */
-    public static String convertToNormalStr(Long millisecond) {
+    //"yyyy-MM-dd'T'HH:mm:ss'Z'"
+    //"yyyy-MM-dd HH:mm:ss"
+    public static String convertToStr(Long millisecond, String f) {
+        SimpleDateFormat sf = new SimpleDateFormat(f, Locale.ENGLISH);
         Date d = new Date(millisecond);
-        return Nor_sf.format(d);
-    }
-    public static String convertToGPXStr(Long millisecond) {
-        Date d = new Date(millisecond);
-        return GPX_sf.format(d);
-    }
-    public static String getCurrentTime(Date date){
-        return YMD_sf.format(date);
+        return sf.format(d);
     }
 
-    public static Long currentTimeToMil(Date date,String utcTime){
+    public static String getUTC(String utcDay, String utcTime) {
         StringBuffer sb = new StringBuffer();
-        sb.append(getCurrentTime(date));
+        sb.append(utcDay);
         sb.append(utcTime);
-        Date utc = null;
-        try {
-            utc = sf.parse(sb.toString());
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return utc.getTime();
+        return sb.toString();
     }
 
-    public static Long convertToMil(String string){
+    public static Long convertToMil(String string, String sf) {
+        SimpleDateFormat f = new SimpleDateFormat(sf, Locale.ENGLISH);
         Date date = null;
         try {
-            date = Nor_sf.parse(string);
+            date = f.parse(string);
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -57,14 +45,18 @@ public class TimeUtils {
         return date.getTime();
     }
 
-    public static Long GPXconvertToMil(String string){
-        Date date = null;
+    public static String getLocalTimeFromUTC(String UTCTime, String sf) {
+        SimpleDateFormat utcFormater = new SimpleDateFormat(sf, Locale.CHINESE);
+        utcFormater.setTimeZone(TimeZone.getTimeZone("UTC"));
+        Date gpsUTCDate = null;
         try {
-            date = GPX_sf.parse(string);
+            gpsUTCDate = utcFormater.parse(UTCTime);
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        // 获取毫秒数
-        return date.getTime();
+        SimpleDateFormat localFormater = new SimpleDateFormat(sf, Locale.CHINESE);
+        localFormater.setTimeZone(TimeZone.getDefault());
+        String localTime = localFormater.format(gpsUTCDate.getTime());
+        return localTime;
     }
 }

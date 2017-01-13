@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_data_manager"
-    android:orientation="vertical"
-    android:background="@color/colorPrimary"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
@@ -14,81 +13,94 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.yang.nav.view.activity.DataManagerActivity">
     <TextView
-        android:layout_marginTop="50dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textStyle="bold"
-        android:textSize="30sp"
-        android:text="@string/data_manager_title"/>
+        android:text="@string/data_manager_title"
+        android:textSize="25sp"
+        android:textStyle="bold" />
     <TextView
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="100dp"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textSize="30sp"
-        android:text="@string/start_time"/>
+        android:layout_marginTop="30dp"
+        android:text="@string/start_time"
+        android:textSize="20sp" />
     <EditText
-        android:focusable="false"
-        android:gravity="center"
-        android:background="#ffffff"
-        android:layout_marginTop="50dp"
         android:id="@+id/et_start"
-        android:layout_width="300dp"
-        android:textSize="30sp"
-        android:layout_marginLeft="100dp"
-        android:layout_height="wrap_content" />
-    <TextView
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="50dp"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textSize="30sp"
-        android:text="@string/end_time"/>
-    <EditText
         android:focusable="false"
         android:gravity="center"
-        android:background="#ffffff"
-        android:layout_marginTop="50dp"
+        android:textSize="20sp" />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/end_time"
+        android:textSize="20sp" />
+
+    <EditText
         android:id="@+id/et_end"
-        android:layout_width="300dp"
-        android:textSize="30sp"
-        android:layout_marginLeft="100dp"
-        android:layout_height="wrap_content" />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:focusable="false"
+        android:gravity="center"
+        android:textSize="20sp" />
+    <EditText
+        android:id="@+id/et_selected"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:focusable="false"
+        android:gravity="center"
+        android:hint="@string/selected_date"
+        android:textSize="20sp" />
     <LinearLayout
-        android:layout_marginTop="180dp"
+        android:id="@+id/ll_deal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone">
+        <Button
+            android:id="@+id/btn_data_delete"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawableLeft="@mipmap/btn_delete"
+            android:text="@string/delete" />
+        <Button
+            android:id="@+id/btn_data_export"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawableLeft="@mipmap/btn_export"
+            android:text="@string/export_info" />
+        <Button
+            android:id="@+id/btn_data_review"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawableLeft="@mipmap/btn_review"
+            android:text="@string/review" />
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
-        <Button
-            android:id="@+id/btn_data_delete"
-            android:textSize="25sp"
-            android:text="@string/delete"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content" />
-        <Button
-            android:id="@+id/btn_data_export"
-            android:textSize="25sp"
-            android:text="@string/export_info"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content" />
+
         <Button
             android:id="@+id/btn_data_import"
-            android:textSize="25sp"
-            android:text="@string/import_info"
             android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_height="wrap_content" />
+            android:drawableLeft="@mipmap/btn_import"
+            android:text="@string/import_info" />
         <Button
-            android:id="@+id/btn_data_review"
-            android:textSize="25sp"
-            android:text="@string/review"
+            android:id="@+id/btn_data_select"
             android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_height="wrap_content" />
+            android:drawableLeft="@mipmap/btn_select"
+            android:text="@string/select" />
     </LinearLayout>
+
 
 </LinearLayout>

@@ -35,7 +35,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +42,16 @@ import java.util.List;
 
 public class TestActivity extends AppCompatActivity implements OnDateSetListener, View.OnClickListener, HandlerUtils.OnReceiveMessageListener {
 
+    public static final String F = "yyyy-MM-dd HH:mm";
+    public static final String KEY = "jxz236-20141118-02-L-F-A11100";
+    // 调试时所使用的输出信息
+    private final static String TAG = "TestActivity";
+    //应用跟目录
+    private static String mAppPath = null;
+    //应用名
+    private static String mAppName = null;
+    //dpi
+    private static int mDensityDpi = 0;
     private ListView lv_points;
     private ArrayAdapter<Point> arrayAdapter;
     private PointManager pointManager;
@@ -53,20 +62,6 @@ public class TestActivity extends AppCompatActivity implements OnDateSetListener
     private Long start;
     private Long end;
     private  List<Point> list;
-    SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-
-
-
-    public static final String KEY = "jxz236-20141118-02-L-F-A11100";
-    //应用跟目录
-    private static String mAppPath = null;
-    //应用名
-    private static String mAppName = null;
-    // 调试时所使用的输出信息
-    private final static String TAG = "TestActivity";
-    //dpi
-    private static int mDensityDpi = 0;
-
     private HandlerUtils.HandlerHolder mHandler = new HandlerUtils.HandlerHolder(this);
 
     @Override
@@ -132,11 +127,11 @@ public class TestActivity extends AppCompatActivity implements OnDateSetListener
 
         switch(timePickerView.getTag()){
             case "start":
-                String start = TimeUtils.convertToNormalStr(seconds);
+                String start = TimeUtils.convertToStr(seconds, F);
                 et_start.setText(start);
                 break;
             case "end":
-                String end = TimeUtils.convertToNormalStr(seconds);
+                String end = TimeUtils.convertToStr(seconds, F);
                 et_end.setText(end);
                 break;
             default:
@@ -157,11 +152,11 @@ public class TestActivity extends AppCompatActivity implements OnDateSetListener
                 endTime.show(getSupportFragmentManager(),"end");
                 break;
             case R.id.btn_insert:
-                start = TimeUtils.convertToMil(et_start.getText().toString());
-                end = TimeUtils.convertToMil(et_end.getText().toString());
+                start = TimeUtils.convertToMil(et_start.getText().toString(), F);
+                end = TimeUtils.convertToMil(et_end.getText().toString(), F);
                 List<Point> points = new ArrayList<Point>();
                 for (int i = 0; i < 10000; i++) {
-                    points.add(new Point(null,1D,1D,random(start,end)));
+                    points.add(new Point(null, 1D, 1D, random(start, end), 1D));
                 }
                 if(pointManager.insertMultObject(points)){
                     ToastUtils.showToast(TestActivity.this,"插入成功");

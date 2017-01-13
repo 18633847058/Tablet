@@ -24,4 +24,6 @@
     <string name="zoom_in">放大</string>
     <string name="zoom_out">缩小</string>
     <string name="start_location">开始定位</string>
+    <string name="select">查找</string>
+    <string name="selected_date">查找结果</string>
 </resources>

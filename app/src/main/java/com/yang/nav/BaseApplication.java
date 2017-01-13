@@ -14,11 +14,11 @@ import cn.wch.ch34xuartdriver.CH34xUARTDriver;
  */
 
 public class BaseApplication extends Application {
+    public static CH34xUARTDriver driver;
     /** A flag to show how easily you can switch from standard SQLite to the encrypted SQLCipher. */
 //    public static final boolean ENCRYPTED = true;
 //    private DaoSession daoSession;
     private PointManager pointManager;
-    public static CH34xUARTDriver driver;
 
     @Override
     public void onCreate() {
@@ -37,9 +37,4 @@ public class BaseApplication extends Application {
         License.cleanup();
         super.onTerminate();
     }
-//    public DaoSession getDaoSession() {
-//        return daoSession;
-//    }
-
-
 }

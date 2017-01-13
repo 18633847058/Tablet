@@ -7,7 +7,6 @@
     tools:context="com.yang.nav.view.activity.MapViewActivity">
 
     <com.yang.nav.map.CustomMapView
-        android:layout_below="@+id/ll_info"
         android:id="@+id/mv_show"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
@@ -16,18 +15,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <LinearLayout
+            android:id="@+id/ll_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_margin="16dp"
             android:layout_marginTop="8dp"
-            android:id="@+id/ll_info"
             android:background="@drawable/new_card"
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:orientation="vertical">
             <LinearLayout
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="4dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:layout_marginTop="8dp"
                 android:orientation="horizontal">
                 <TextView
                     android:layout_width="0dp"
@@ -38,36 +37,36 @@
 
                 <TextView
                     android:id="@+id/tv_speed"
-                    android:layout_marginLeft="8dp"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
                     android:layout_weight="1"
-                    android:text="111111"/>
+                    android:text="0" />
 
                 <TextView
-                    android:layout_marginLeft="8dp"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
                     android:layout_weight="1"
                     android:gravity="center"
                     android:text="@string/direction" />
                 <TextView
                     android:id="@+id/tv_direction"
-                    android:layout_marginLeft="8dp"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
                     android:layout_weight="1"
-                    android:text="111111"/>
+                    android:text="无" />
             </LinearLayout>
             <ImageView
                 android:layout_width="match_parent"
-                android:layout_height="1dp"
+                android:layout_height="2dp"
                 android:background="@mipmap/horizontal_line"/>
             <LinearLayout
-                android:layout_marginTop="4dp"
-                android:layout_marginBottom="8dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="4dp"
                 android:orientation="horizontal">
 
                 <TextView
@@ -79,30 +78,30 @@
 
                 <TextView
                     android:id="@+id/tv_longitude"
-                    android:layout_marginLeft="8dp"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
                     android:layout_weight="1"
-                    android:text="111111"/>
+                    android:text="0" />
 
                 <TextView
-                    android:layout_marginLeft="8dp"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
                     android:layout_weight="1"
                     android:gravity="center"
                     android:text="@string/latitude" />
                 <TextView
                     android:id="@+id/tv_latitude"
-                    android:layout_marginLeft="8dp"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
                     android:layout_weight="1"
-                    android:text="111111"/>
+                    android:text="0" />
             </LinearLayout>
             <ImageView
                 android:layout_width="match_parent"
-                android:layout_height="1dp"
+                android:layout_height="2dp"
                 android:background="@mipmap/horizontal_line"/>
         </LinearLayout>
         <RelativeLayout
@@ -121,22 +120,22 @@
                 android:id="@+id/btn_zoom_in"
                 android:layout_width="45dp"
                 android:layout_height="45dp"
-                android:contentDescription="@string/zoom_in"
                 android:layout_alignParentTop="true"
-                android:src="@drawable/btn_zoom_in"
                 android:background="@drawable/circle_button_with_shadow"
-                android:clickable="true" />
+                android:clickable="true"
+                android:contentDescription="@string/zoom_in"
+                android:src="@drawable/btn_zoom_in" />
 
             <ImageButton
                 android:id="@+id/btn_zoom_out"
                 android:layout_width="45dp"
                 android:layout_height="45dp"
                 android:layout_below="@id/btn_zoom_in"
-                android:contentDescription="@string/zoom_out"
                 android:layout_marginTop="13dp"
-                android:src="@drawable/btn_zoom_out"
                 android:background="@drawable/circle_button_with_shadow"
-                android:clickable="true" />
+                android:clickable="true"
+                android:contentDescription="@string/zoom_out"
+                android:src="@drawable/btn_zoom_out" />
 
         </RelativeLayout>
 
@@ -154,13 +153,13 @@
             android:id="@+id/btn_start_location"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:drawableLeft="@mipmap/ic_start_location"
-            android:text="@string/start_location"
             android:layout_alignBottom="@+id/btn_location_mode"
-            android:layout_toRightOf="@+id/btn_location_mode"
-            android:layout_toEndOf="@+id/btn_location_mode"
             android:layout_marginLeft="58dp"
-            android:layout_marginStart="58dp" />
+            android:layout_marginStart="58dp"
+            android:layout_toEndOf="@+id/btn_location_mode"
+            android:layout_toRightOf="@+id/btn_location_mode"
+            android:drawableLeft="@mipmap/ic_start_location"
+            android:text="@string/start_location" />
     </RelativeLayout>
 
 

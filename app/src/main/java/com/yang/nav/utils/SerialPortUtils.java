@@ -5,11 +5,16 @@ import android.util.Log;
 import com.nmea.core.CodecManager;
 import com.nmea.obj.AbstractNmeaObject;
 import com.nmea.obj.GgaNmeaObject;
+import com.nmea.obj.VelNmeaObject;
 import com.yang.nav.model.entity.Point;
 
+import java.lang.ref.WeakReference;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import static com.yang.nav.BaseApplication.driver;
 
@@ -20,8 +25,15 @@ import static com.yang.nav.BaseApplication.driver;
 
 public class SerialPortUtils {
 
-    private OnDataReceiveListener onDataReceiveListener = null;
+    private static final String SF = "yyyy年MM月dd日HH时mm分ss秒";
     private static SerialPortUtils portUtil;
+    public int baudRate = 115200;
+    public byte stopBit = 1;
+    public byte dataBit = 8;
+    public byte parity = 0;
+    public byte flowControl = 0;
+    CodecManager codecManager = CodecManager.getInstance();
+    private WeakReference<OnDataReceiveListener> onDataReceiveListener;
     //缓存的字节数组
     private byte[] recvBuff = new byte[10240];
     private byte[] oneFrameBuff = null;
@@ -29,29 +41,21 @@ public class SerialPortUtils {
     private int endPoint = 0;
     private int recvBuffLen = 0;
     private List<byte[]> frameList = new ArrayList<>();
-    CodecManager codecManager = CodecManager.getInstance();
-    public int baudRate = 9600;
-    public byte stopBit = 1;
-    public byte dataBit = 8;
-    public byte parity = 0;
-    public byte flowControl = 0;
     private ReadThread thread = null;
+    private Point point = null;
 
     private SerialPortUtils() {
     }
 
-    public interface OnDataReceiveListener {
-        public void onDataReceive(String string);
-    }
-
-    public void setOnDataReceiveListener(OnDataReceiveListener onDataReceiveListener) {
-        this.onDataReceiveListener = onDataReceiveListener;
-    }
     public static SerialPortUtils getInstance() {
         if (null == portUtil) {
             portUtil = new SerialPortUtils();
         }
         return portUtil;
+    }
+
+    public void setOnDataReceiveListener(OnDataReceiveListener onDataReceiveListener) {
+        this.onDataReceiveListener = new WeakReference<>(onDataReceiveListener);
     }
 
     public boolean onConfig(){
@@ -69,10 +73,12 @@ public class SerialPortUtils {
         }
         return flag;
     }
+
     public void onStart(){
         thread = new ReadThread();
         thread.start();
     }
+
     public void onDestroy() {
         try {
             if (null != thread) {
@@ -91,64 +97,6 @@ public class SerialPortUtils {
         }
     }
 
-    private class ReadThread extends Thread {
-
-        @Override
-        public void run() {
-            super.run();
-            while (!isInterrupted()) {
-                int size;
-                try {
-                    if (driver == null)
-                        return;
-                    byte[] buffer = new byte[512];
-                    size = driver.ReadData(buffer,512);
-                    String str = "";
-                    if (size > 0) {
-                        String s = new String(buffer,0,size,"GB2312");
-//                        Log.e("总数据：" , s);
-                        inputStreamBuff(buffer,size);
-                        while (setFrame()){
-                            oneFrameBuff = getFrame();
-                            str = new String(oneFrameBuff,"GB2312");
-                            Log.e("一帧数据：" , str);
-                            try {
-                                codecManager.decode(str);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            Point point = null;
-                            AbstractNmeaObject nmeaObject = CodecManager.getNmeaObject();
-                            if (nmeaObject != null) {
-                                if(nmeaObject.getObjType() == AbstractNmeaObject.GGA_PROTOL){
-                                    GgaNmeaObject ggaNmeaObject = (GgaNmeaObject) nmeaObject;
-//                                    Log.e("-----", "----------------------------");
-                                    System.out.println(ggaNmeaObject.getLatitude());
-                                    System.out.println(ggaNmeaObject.getLongitude());
-                                    if(ggaNmeaObject.getLatitude()!=null&&ggaNmeaObject.getLongitude()!=null) {
-                                        point = new Point();
-                                        point.setLatitude(Double.valueOf(ggaNmeaObject.getLatitude()));
-                                        point.setLongitude(Double.valueOf(ggaNmeaObject.getLongitude()));
-                                        point.setTime(TimeUtils.currentTimeToMil(new Date(), ggaNmeaObject.getUtc_Time()));
-                                        Log.e("转化的Point", point.toString());
-                                    }
-                                }
-                            }
-                        }
-//                          String str = new String(buffer, 0, size);
-//                          Logger.d("length is:"+size+",data is:"+new String(buffer, 0, size));
-                        if (null != onDataReceiveListener) {
-                            onDataReceiveListener.onDataReceive(str);
-                        }
-                    }
-                    Thread.sleep(10);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return;
-                }
-            }
-        }
-    }
     private void inputStreamBuff(byte[] bytes,int length){
         if(recvBuffLen + length > 10240){
             recvBuffLen = 0;
@@ -157,6 +105,7 @@ public class SerialPortUtils {
         System.arraycopy(bytes, 0, recvBuff, recvBuffLen, length);
         recvBuffLen += length;
     }
+
     private boolean setFrame(){
         //确定是否找到开始点
         endPoint = 0;
@@ -200,7 +149,84 @@ public class SerialPortUtils {
         frameList.add(oneFrameBuff);
         return true;
     }
+
     private byte[] getFrame(){
         return frameList.remove(0);
+    }
+
+    private String getUTCDay() {
+        SimpleDateFormat sf = new SimpleDateFormat("yyyy年MM月dd日", Locale.ENGLISH);
+        Calendar calendar = Calendar.getInstance();
+        int offset = calendar.get(Calendar.ZONE_OFFSET);
+        calendar.add(Calendar.MILLISECOND, -offset);
+        Date date = calendar.getTime();
+        return sf.format(date);
+    }
+
+    public interface OnDataReceiveListener {
+        public void onDataReceive(Point p);
+    }
+
+    private class ReadThread extends Thread {
+
+        @Override
+        public void run() {
+            super.run();
+            while (!isInterrupted()) {
+                int size;
+                try {
+                    if (driver == null)
+                        return;
+                    byte[] buffer = new byte[512];
+                    size = driver.ReadData(buffer, 512);
+                    String str = "";
+                    if (size > 0) {
+                        String s = new String(buffer, 0, size, "GB2312");
+//                        Log.e("总数据：" , s);
+                        inputStreamBuff(buffer, size);
+                        while (setFrame()) {
+                            oneFrameBuff = getFrame();
+                            str = new String(oneFrameBuff, "GB2312");
+                            Log.e("一帧数据：", str);
+                            try {
+                                codecManager.decode(str);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
+                            AbstractNmeaObject nmeaObject = CodecManager.getNmeaObject();
+                            if (nmeaObject != null) {
+                                if (nmeaObject.getObjType() == AbstractNmeaObject.GGA_PROTOL) {
+                                    GgaNmeaObject ggaNmeaObject = (GgaNmeaObject) nmeaObject;
+                                    if (ggaNmeaObject.getLatitude() != null && ggaNmeaObject.getLongitude() != null && ggaNmeaObject.getGpa_flag() != 0) {
+                                        point = new Point();
+                                        point.setLatitude(Double.valueOf(ggaNmeaObject.getLatitude()));
+                                        point.setLongitude(Double.valueOf(ggaNmeaObject.getLongitude()));
+                                        point.setTime(TimeUtils.convertToMil(TimeUtils.getLocalTimeFromUTC(TimeUtils.getUTC(getUTCDay(), ggaNmeaObject.getUtc_Time()), SF), SF));
+                                    }
+                                }
+                                if (nmeaObject.getObjType() == AbstractNmeaObject.VEL_PROTOL) {
+                                    VelNmeaObject velNmeaObject = (VelNmeaObject) nmeaObject;
+                                    if (velNmeaObject.getHor_speed() != null) {
+                                        if (point != null) {
+                                            point.setSpeed(Double.valueOf(velNmeaObject.getHor_speed()));
+                                            Log.e("转化的Point", point.toString());
+                                        }
+                                    }
+                                }
+                            }
+                            if (null != onDataReceiveListener && null != point && point.getTime() != null && point.getSpeed() != null) {
+                                onDataReceiveListener.get().onDataReceive(point);
+                                point = null;
+                            }
+                        }
+                    }
+                    Thread.sleep(10);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return;
+                }
+            }
+        }
     }
 }

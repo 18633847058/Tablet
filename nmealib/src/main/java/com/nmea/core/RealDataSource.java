@@ -17,7 +17,7 @@ public class RealDataSource extends AbstractDataSource{
 		if (nmeaObject != null) {
 			if(nmeaObject.getObjType() == AbstractNmeaObject.GGA_PROTOL){
 				GgaNmeaObject ggaNmeaObject = (GgaNmeaObject) nmeaObject;
-				System.out.println(ggaNmeaObject.getLatitude());
+				System.out.println(ggaNmeaObject.getType());
 			}
 		}
 	}

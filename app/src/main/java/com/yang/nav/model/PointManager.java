@@ -18,7 +18,12 @@ import java.util.List;
 
 public class PointManager extends BaseDao<Point> {
 
+    public static final String SF = "yyyy-MM-dd HH:mm";
     private volatile static PointManager pointManager;//多线程访问
+
+    private PointManager(Context context) {
+        super(context);
+    }
 
     public static PointManager getInstance(Context context){
         PointManager instance = null;
@@ -32,10 +37,8 @@ public class PointManager extends BaseDao<Point> {
         }
         return pointManager;
     }
-    private PointManager(Context context) {
-        super(context);
-    }
     /***************************数据库查询*************************/
+
     /**
      * 通过ID查询对象
      * @param id
@@ -96,8 +99,8 @@ public class PointManager extends BaseDao<Point> {
      * @return
      */
     public List<Point> getPointsByTime(String s, String e){
-        Long start = TimeUtils.convertToMil(s);
-        Long end = TimeUtils.convertToMil(e);
+        Long start = TimeUtils.convertToMil(s, SF);
+        Long end = TimeUtils.convertToMil(e, SF);
         QueryBuilder queryBuilder =  session.getPointDao().queryBuilder();
         queryBuilder.where(PointDao.Properties.Time.between(start,end));
         int size = queryBuilder.list().size();
@@ -115,7 +118,6 @@ public class PointManager extends BaseDao<Point> {
      * @param id
      */
     public void deleteById(long id){
-
         session.getPointDao().deleteByKey(id);
     }
 
@@ -125,7 +127,6 @@ public class PointManager extends BaseDao<Point> {
      * @param ids
      */
     public void deleteByIds(List<Long> ids){
-
         session.getPointDao().deleteByKeyInTx(ids);
     }
     public boolean deletePointsByTime(String start, String end){

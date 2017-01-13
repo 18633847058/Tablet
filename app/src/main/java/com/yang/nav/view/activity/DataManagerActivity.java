@@ -8,32 +8,39 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 
 import com.jzxiang.pickerview.TimePickerDialog;
 import com.jzxiang.pickerview.data.Type;
 import com.jzxiang.pickerview.listener.OnDateSetListener;
 import com.yang.nav.R;
 import com.yang.nav.model.PointManager;
+import com.yang.nav.model.entity.Point;
 import com.yang.nav.utils.DialogUtils;
 import com.yang.nav.utils.MyAsyncTask;
 import com.yang.nav.utils.TimeUtils;
 import com.yang.nav.utils.ToastUtils;
 
-import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 
 
 public class DataManagerActivity extends AppCompatActivity implements View.OnClickListener, OnDateSetListener {
 
     private static final int REC_REQUEST_CODE = 1;
+    public static ArrayList<Point> points;
     private TimePickerDialog startTime;
     private TimePickerDialog endTime;
     private EditText et_start;
     private EditText et_end;
-    private Long start;
-    private Long end;
+    private EditText et_selected;
+    private LinearLayout ll_deal;
+    private Button btn_data_delete;
+    private Button btn_data_export;
+    private Button btn_data_import;
+    private Button btn_data_review;
+    private Button btn_data_select;
     private MyAsyncTask myAsyncTask;
     private PointManager pointManager;
-    public SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,16 +62,20 @@ public class DataManagerActivity extends AppCompatActivity implements View.OnCli
                 onBackPressed();
             }
         });
-        Button btn_data_delete = (Button) findViewById(R.id.btn_data_delete);
-        Button btn_data_export = (Button) findViewById(R.id.btn_data_export);
-        Button btn_data_import = (Button) findViewById(R.id.btn_data_import);
-        Button btn_data_review = (Button) findViewById(R.id.btn_data_review);
+        btn_data_delete = (Button) findViewById(R.id.btn_data_delete);
+        btn_data_export = (Button) findViewById(R.id.btn_data_export);
+        btn_data_import = (Button) findViewById(R.id.btn_data_import);
+        btn_data_review = (Button) findViewById(R.id.btn_data_review);
+        btn_data_select = (Button) findViewById(R.id.btn_data_select);
         btn_data_delete.setOnClickListener(this);
         btn_data_export.setOnClickListener(this);
         btn_data_import.setOnClickListener(this);
         btn_data_review.setOnClickListener(this);
+        btn_data_select.setOnClickListener(this);
+        ll_deal = (LinearLayout) findViewById(R.id.ll_deal);
         et_start = (EditText) findViewById(R.id.et_start);
         et_end = (EditText) findViewById(R.id.et_end);
+        et_selected = (EditText) findViewById(R.id.et_selected);
         et_end.setOnClickListener(this);
         et_start.setOnClickListener(this);
         long tenYears = 10L * 365 * 1000 * 60 * 60 * 24L;
@@ -95,17 +106,20 @@ public class DataManagerActivity extends AppCompatActivity implements View.OnCli
     @Override
     public void onClick(View v) {
         switch (v.getId()){
-            case R.id.btn_data_delete:
-                dataManager(MyAsyncTask.Type.DELETE);
-                break;
-            case R.id.btn_data_export:
-                dataManager(MyAsyncTask.Type.EXPORT);
-                break;
             case R.id.btn_data_import:
                 Intent intent=new Intent(Intent.ACTION_GET_CONTENT);
                 intent.setType("text/plain");
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
                 startActivityForResult(intent,REC_REQUEST_CODE);
+                break;
+            case R.id.btn_data_select:
+                dataManager(MyAsyncTask.Type.SELECT);
+                break;
+            case R.id.btn_data_delete:
+                dataManager(MyAsyncTask.Type.DELETE);
+                break;
+            case R.id.btn_data_export:
+                dataManager(MyAsyncTask.Type.EXPORT);
                 break;
             case R.id.btn_data_review:
                 dataManager(MyAsyncTask.Type.REVIEW);
@@ -130,15 +144,26 @@ public class DataManagerActivity extends AppCompatActivity implements View.OnCli
         myAsyncTask.execute(type);
     }
 
+    public void setVisibility(boolean flag, int i) {
+        if (flag) {
+            ll_deal.setVisibility(View.VISIBLE);
+            et_selected.setText("总共查找到" + i + "个点，可以进行以下操作。");
+        } else {
+            ll_deal.setVisibility(View.GONE);
+            et_selected.setText("");
+        }
+    }
+
     @Override
     public void onDateSet(TimePickerDialog timePickerView, long seconds) {
+        setVisibility(false, 0);
         switch(timePickerView.getTag()){
             case "start":
-                String start = TimeUtils.convertToNormalStr(seconds);
+                String start = TimeUtils.convertToStr(seconds, "yyyy-MM-dd HH:mm");
                 et_start.setText(start);
                 break;
             case "end":
-                String end = TimeUtils.convertToNormalStr(seconds);
+                String end = TimeUtils.convertToStr(seconds, "yyyy-MM-dd HH:mm");
                 et_end.setText(end);
                 break;
             default:

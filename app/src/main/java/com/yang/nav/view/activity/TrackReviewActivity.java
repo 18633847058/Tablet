@@ -1,17 +1,12 @@
 package com.yang.nav.view.activity;
 
-import android.content.Context;
-import android.graphics.Point;
-import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mapbar.map.MapRenderer;
@@ -19,18 +14,14 @@ import com.mapbar.map.Overlay;
 import com.mapbar.map.PolylineOverlay;
 import com.yang.nav.R;
 import com.yang.nav.map.CustomMapView;
-import com.yang.nav.model.PointManager;
+import com.yang.nav.model.entity.Point;
 import com.yang.nav.utils.HandlerUtils;
-import com.yang.nav.utils.SerialPortUtils;
 
-import cn.wch.ch34xuartdriver.CH34xUARTDriver;
+import java.util.ArrayList;
 
-import static com.yang.nav.BaseApplication.driver;
+public class TrackReviewActivity extends AppCompatActivity implements HandlerUtils.OnReceiveMessageListener, CustomMapView.OnScrollListener, View.OnClickListener {
 
-public class MapViewActivity extends AppCompatActivity implements HandlerUtils.OnReceiveMessageListener, View.OnClickListener, SerialPortUtils.OnDataReceiveListener, CustomMapView.OnScrollListener {
-
-    private static final String TAG = MapViewActivity.class.getSimpleName();
-    private static final String ACTION_USB_PERMISSION = "com.yang.nav.USB_PERMISSION";
+    private static final String TAG = TrackReviewActivity.class.getSimpleName();
     //地图控制类
     private CustomMapView customMapView;
     //地图渲染
@@ -39,45 +30,24 @@ public class MapViewActivity extends AppCompatActivity implements HandlerUtils.O
     private ImageButton mZoomInImageView = null;
     private ImageButton mZoomOutImageView = null;
     private ImageButton mLocationMode = null;
-    private Button mStartLocate = null;
-    private TextView tv_speed;
-    private TextView tv_direction;
-    private TextView tv_longitude;
-    private TextView tv_latitude;
 
+    private PolylineOverlay pl1 = null;
+    private ArrayList<Point> points = null;
     private HandlerUtils.HandlerHolder mHandler = new HandlerUtils.HandlerHolder(this);
-
-    //串口
-    private SerialPortUtils portUtil;
-    private boolean isOpen = false;
-
-    //数据库
-    private PointManager pointManager;
-    private Point lastPoint = null;
-    private int i = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        setContentView(R.layout.activity_map_view);
+        setContentView(R.layout.activity_track_review);
+        Bundle bundle = getIntent().getExtras();
+        points = bundle.getParcelableArrayList("points");
         initMap();
         initView();
-        initPort();
-        pointManager = PointManager.getInstance(getApplicationContext());
+        Log.e(TAG, "onCreate: " + points.toString());
     }
 
-    private void initPort() {
-        if(driver == null){
-            driver = new CH34xUARTDriver(
-                    (UsbManager) getSystemService(Context.USB_SERVICE), this.getApplicationContext(),
-                    ACTION_USB_PERMISSION);
-        }
-        portUtil = SerialPortUtils.getInstance();
-        portUtil.setOnDataReceiveListener(this);
-    }
-
-    private void initMap () {
+    private void initMap() {
         try {
             // 加载地图
             customMapView = (CustomMapView) findViewById(R.id.mv_show);
@@ -90,49 +60,28 @@ public class MapViewActivity extends AppCompatActivity implements HandlerUtils.O
             e.printStackTrace();
         }
     }
+
     /**
      * 初始化控件
      */
-    private void initView () {
-        tv_direction = (TextView) findViewById(R.id.tv_direction);
-        tv_speed = (TextView) findViewById(R.id.tv_speed);
-        tv_longitude = (TextView) findViewById(R.id.tv_longitude);
-        tv_latitude = (TextView) findViewById(R.id.tv_latitude);
+    private void initView() {
         mZoomInImageView = (ImageButton) findViewById(R.id.btn_zoom_in); // 地图放大按钮
         mZoomOutImageView = (ImageButton) findViewById(R.id.btn_zoom_out); // 地图缩小按钮
         mLocationMode = (ImageButton) findViewById(R.id.btn_location_mode); // 地图模式改变
         mLocationMode.setTag(2);
-        mStartLocate = (Button) findViewById(R.id.btn_start_location);
         mZoomInImageView.setOnClickListener(this);
         mZoomOutImageView.setOnClickListener(this);
         mLocationMode.setOnClickListener(this);
-        mStartLocate.setOnClickListener(this);
     }
-
 
     @Override
     public void handlerMessage(Message msg) {
-        switch(msg.what){
+        switch (msg.what) {
             case 1:
                 //地图控件加载完毕
                 mRenderer = customMapView.getMapRenderer();
                 mRenderer.setDataMode(MapRenderer.DataMode.offline);
-                break;
-            case 2:
-                com.yang.nav.model.entity.Point point = (com.yang.nav.model.entity.Point) msg.obj;
-                Double lon = point.getLongitude() * 100000;
-                Double lat = point.getLatitude() * 100000;
-                Point p = new Point(lon.intValue(), lat.intValue());
-                if (lastPoint == null) {
-                    lastPoint = p;
-                }
-                tv_speed.setText(point.getSpeed().toString());
-                tv_longitude.setText(String.valueOf(lon.intValue()));
-                tv_latitude.setText(String.valueOf(lat.intValue()));
-                Log.e(TAG, "handlerMessage: " + i++);
-//                ToastUtils.showToast(MapViewActivity.this, p.toString());
-                customMapView.setCarPosition(p);
-                showRoute(p);
+                showRoute();
                 break;
             case 100:
                 //监听地图缩放 修改按钮状态
@@ -140,6 +89,37 @@ public class MapViewActivity extends AppCompatActivity implements HandlerUtils.O
                 mZoomInImageView.setEnabled(b.getBoolean("zoomOut"));
                 mZoomOutImageView.setEnabled(b.getBoolean("zoomIn"));
                 break;
+        }
+    }
+
+    private void showRoute() {
+        if (points != null) {
+            android.graphics.Point[] ps = new android.graphics.Point[points.size()];
+            for (int i = 0; i < points.size(); i++) {
+
+                Point point = points.get(i);
+                Double lon = point.getLongitude() * 100000;
+                Double lat = point.getLatitude() * 100000;
+                android.graphics.Point p = new android.graphics.Point(lon.intValue(), lat.intValue());
+                if (i == points.size() - 1) {
+                    customMapView.setCarPosition(p);
+                }
+                ps[i] = p;
+            }
+            Log.e(TAG, "showRoute: " + ps);
+            pl1 = new PolylineOverlay(ps, false);
+            pl1.setColor(0xffaa0000);
+            pl1.setStrokeStyle(Overlay.StrokeStyle.solid);
+            pl1.setWidth(5.0f);
+            mRenderer.addOverlay(pl1);
+        }
+    }
+
+    @Override
+    public void onScroll() {
+        if (mRenderer.getWorldCenter() != customMapView.getCarPosition()) {
+            mLocationMode.setImageResource(R.mipmap.ic_qu_direction_location_lost);
+            mLocationMode.setTag(1);
         }
     }
 
@@ -160,7 +140,7 @@ public class MapViewActivity extends AppCompatActivity implements HandlerUtils.O
                 //改变地图状态
 //                Toast.makeText(this,mRenderer.getWorldCenter().toString(),Toast.LENGTH_LONG).show();
 //                customMapView.setCarPosition(new Point(11640162, 3990778));
-                switch ((int)mLocationMode.getTag()){
+                switch ((int) mLocationMode.getTag()) {
                     case 1:
                         mRenderer.beginAnimations();
                         mRenderer.setWorldCenter(customMapView.getCarPosition());
@@ -189,38 +169,6 @@ public class MapViewActivity extends AppCompatActivity implements HandlerUtils.O
                         break;
                 }
                 break;
-            case R.id.btn_start_location:
-//                readPoints();
-                if (!isOpen) {
-                    if (portUtil.onConfig()) {
-                        isOpen = true;
-                        mStartLocate.setText("结束定位");
-                        portUtil.onStart();//开启读线程读取串口接收的数据
-                    }
-                } else {
-                    portUtil.onDestroy();
-                    mStartLocate.setText("开始定位");
-                    isOpen = false;
-                }
-                break;
-        }
-    }
-
-    public void showRoute(Point p) {
-//        customMapView.setCarPosition(new Point(11640162, 3990778));
-        // 线
-        if (!lastPoint.equals(p)) {
-            Point[] route = new Point[2];
-            route[0] = lastPoint;
-            route[1] = p;
-            PolylineOverlay pl1 = new PolylineOverlay(route, false);
-            pl1.setColor(0xffaa0000);
-            pl1.setStrokeStyle(Overlay.StrokeStyle.solid);
-            pl1.setWidth(5.0f);
-            mRenderer.addOverlay(pl1);
-            lastPoint = p;
-        } else {
-            mRenderer.setWorldCenter(p);
         }
     }
 
@@ -249,33 +197,10 @@ public class MapViewActivity extends AppCompatActivity implements HandlerUtils.O
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        portUtil.onDestroy();
         if (customMapView != null) {
             // 此Activity销毁时，销毁地图控件
             customMapView.onDestroy();
         }
         customMapView = null;
     }
-
-    @Override
-    public void onDataReceive(com.yang.nav.model.entity.Point point) {
-        if (pointManager.insertObject(point)) {
-            Log.e(TAG, "onDataReceive: " + point + "插入成功");
-
-            Message m = mHandler.obtainMessage(2);
-            m.obj = point;
-            mHandler.sendMessage(m);
-        } else {
-            Log.e(TAG, "onDataReceive: " + point + "插入失败");
-        }
-    }
-
-    @Override
-    public void onScroll() {
-        if (mRenderer.getWorldCenter() != customMapView.getCarPosition()) {
-            mLocationMode.setImageResource(R.mipmap.ic_qu_direction_location_lost);
-            mLocationMode.setTag(1);
-        }
-    }
-
 }

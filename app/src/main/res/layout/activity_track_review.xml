@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_map_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.yang.nav.view.activity.MapViewActivity">
+
+    <com.yang.nav.map.CustomMapView
+        android:id="@+id/mv_show"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:id="@+id/rl_zoom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignWithParentIfMissing="true"
+            android:layout_marginBottom="20dp"
+            android:layout_marginRight="13dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <ImageButton
+                android:id="@+id/btn_zoom_in"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_alignParentTop="true"
+                android:background="@drawable/circle_button_with_shadow"
+                android:clickable="true"
+                android:contentDescription="@string/zoom_in"
+                android:src="@drawable/btn_zoom_in" />
+
+            <ImageButton
+                android:id="@+id/btn_zoom_out"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_below="@id/btn_zoom_in"
+                android:layout_marginTop="13dp"
+                android:background="@drawable/circle_button_with_shadow"
+                android:clickable="true"
+                android:contentDescription="@string/zoom_out"
+                android:src="@drawable/btn_zoom_out" />
+
+        </RelativeLayout>
+
+        <ImageButton
+            android:id="@+id/btn_location_mode"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="36dp"
+            android:layout_marginLeft="36dp"
+            android:background="@drawable/circle_button_with_shadow"
+            android:src="@mipmap/ic_qu_direction_location" />
+    </RelativeLayout>
+
+
+</FrameLayout>
