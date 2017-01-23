@@ -172,8 +172,6 @@ public class GgaNmeaObject extends AbstractNmeaObject {
 			str.append(",差分参考基站ID号:");
 			str.append(this.msgFields.get(14));
 		}
-
-
 		return str.toString();
 	}
 }

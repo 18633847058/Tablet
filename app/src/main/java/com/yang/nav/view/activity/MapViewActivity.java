@@ -12,7 +12,6 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.mapbar.map.MapRenderer;
 import com.mapbar.map.Overlay;
@@ -21,7 +20,9 @@ import com.yang.nav.R;
 import com.yang.nav.map.CustomMapView;
 import com.yang.nav.model.PointManager;
 import com.yang.nav.utils.HandlerUtils;
+import com.yang.nav.utils.PointUtils;
 import com.yang.nav.utils.SerialPortUtils;
+import com.yang.nav.utils.TimeUtils;
 
 import cn.wch.ch34xuartdriver.CH34xUARTDriver;
 
@@ -31,6 +32,7 @@ public class MapViewActivity extends AppCompatActivity implements HandlerUtils.O
 
     private static final String TAG = MapViewActivity.class.getSimpleName();
     private static final String ACTION_USB_PERMISSION = "com.yang.nav.USB_PERMISSION";
+    private static final String SF = "HH：mm：ss";
     //地图控制类
     private CustomMapView customMapView;
     //地图渲染
@@ -40,7 +42,9 @@ public class MapViewActivity extends AppCompatActivity implements HandlerUtils.O
     private ImageButton mZoomOutImageView = null;
     private ImageButton mLocationMode = null;
     private Button mStartLocate = null;
-    private TextView tv_speed;
+    private TextView tv_utc_time;
+    private TextView tv_hor_speed;
+    private TextView tv_ver_speed;
     private TextView tv_direction;
     private TextView tv_longitude;
     private TextView tv_latitude;
@@ -63,8 +67,8 @@ public class MapViewActivity extends AppCompatActivity implements HandlerUtils.O
         setContentView(R.layout.activity_map_view);
         initMap();
         initView();
-        initPort();
         pointManager = PointManager.getInstance(getApplicationContext());
+        initPort();
     }
 
     private void initPort() {
@@ -73,8 +77,7 @@ public class MapViewActivity extends AppCompatActivity implements HandlerUtils.O
                     (UsbManager) getSystemService(Context.USB_SERVICE), this.getApplicationContext(),
                     ACTION_USB_PERMISSION);
         }
-        portUtil = SerialPortUtils.getInstance();
-        portUtil.setOnDataReceiveListener(this);
+        portUtil = new SerialPortUtils(pointManager, this);
     }
 
     private void initMap () {
@@ -83,9 +86,6 @@ public class MapViewActivity extends AppCompatActivity implements HandlerUtils.O
             customMapView = (CustomMapView) findViewById(R.id.mv_show);
             customMapView.setZoomHandler(mHandler);
             customMapView.setOnScrollListener(this);
-            if (!customMapView.isOpenNet()) {
-                Toast.makeText(this, "请连接网络", Toast.LENGTH_SHORT).show();
-            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -94,8 +94,10 @@ public class MapViewActivity extends AppCompatActivity implements HandlerUtils.O
      * 初始化控件
      */
     private void initView () {
+        tv_utc_time = (TextView) findViewById(R.id.tv_time);
         tv_direction = (TextView) findViewById(R.id.tv_direction);
-        tv_speed = (TextView) findViewById(R.id.tv_speed);
+        tv_hor_speed = (TextView) findViewById(R.id.tv_hor_speed);
+        tv_ver_speed = (TextView) findViewById(R.id.tv_ver_speed);
         tv_longitude = (TextView) findViewById(R.id.tv_longitude);
         tv_latitude = (TextView) findViewById(R.id.tv_latitude);
         mZoomInImageView = (ImageButton) findViewById(R.id.btn_zoom_in); // 地图放大按钮
@@ -120,15 +122,23 @@ public class MapViewActivity extends AppCompatActivity implements HandlerUtils.O
                 break;
             case 2:
                 com.yang.nav.model.entity.Point point = (com.yang.nav.model.entity.Point) msg.obj;
-                Double lon = point.getLongitude() * 100000;
-                Double lat = point.getLatitude() * 100000;
-                Point p = new Point(lon.intValue(), lat.intValue());
+                java.text.DecimalFormat df = new java.text.DecimalFormat("#.##");
+                Double lon = point.getLongitude();
+                Double lat = point.getLatitude();
+                Double hor_speed = point.getHor_speed();
+                Double ver_speed = point.getVer_speed();
+                Double direction = point.getDirection();
+                tv_hor_speed.setText(df.format(hor_speed));
+                tv_ver_speed.setText(df.format(ver_speed));
+                tv_direction.setText(df.format(direction));
+                tv_utc_time.setText(TimeUtils.convertToStr(point.getTime(), SF));
+                tv_longitude.setText(lon.toString());
+                tv_latitude.setText(lat.toString());
+
+                Point p = PointUtils.gps84_To_Gcj02(point.getLongitude(), point.getLatitude());
                 if (lastPoint == null) {
                     lastPoint = p;
                 }
-                tv_speed.setText(point.getSpeed().toString());
-                tv_longitude.setText(String.valueOf(lon.intValue()));
-                tv_latitude.setText(String.valueOf(lat.intValue()));
                 Log.e(TAG, "handlerMessage: " + i++);
 //                ToastUtils.showToast(MapViewActivity.this, p.toString());
                 customMapView.setCarPosition(p);
@@ -260,13 +270,13 @@ public class MapViewActivity extends AppCompatActivity implements HandlerUtils.O
     @Override
     public void onDataReceive(com.yang.nav.model.entity.Point point) {
         if (pointManager.insertObject(point)) {
-            Log.e(TAG, "onDataReceive: " + point + "插入成功");
+            Log.e(TAG, "插入成功");
 
             Message m = mHandler.obtainMessage(2);
             m.obj = point;
             mHandler.sendMessage(m);
         } else {
-            Log.e(TAG, "onDataReceive: " + point + "插入失败");
+            Log.e(TAG, "插入失败");
         }
     }
 
@@ -277,5 +287,6 @@ public class MapViewActivity extends AppCompatActivity implements HandlerUtils.O
             mLocationMode.setTag(1);
         }
     }
+
 
 }

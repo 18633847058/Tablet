@@ -58,11 +58,12 @@ public class AccNmeaCodec extends AbstractNmeaSentenceCodec {
 		nmeaObject.setMsgChecksum(msgChecksum);
 		nmeaObject.setMsgFields(fileds);
 		nmeaObject.setMsgId(fileds.get(0));
+		nmeaObject.setContent(content);
 		
 		setChanged();
 		notifyObservers(nmeaObject);
-		
-		encode(nmeaObject);
+
+//		encode(nmeaObject);
 	}
 
 	@Override

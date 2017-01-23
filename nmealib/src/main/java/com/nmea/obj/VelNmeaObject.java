@@ -40,7 +40,7 @@ public class VelNmeaObject extends AbstractNmeaObject {
 		String hor_s = this.msgFields.get(2);
 		String an = this.msgFields.get(3);
 		String ver_s = this.msgFields.get(4);
-		if(!hor_s.isEmpty() && !an.isEmpty() && !ver_s.isEmpty()){
+		if (this.getType().equals("G2")) {
 			str.append("，对地水平速度为");
 			str.append(hor_s + "米/秒");
 			hor_speed = hor_s;

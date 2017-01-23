@@ -40,11 +40,10 @@ public class TrackReviewActivity extends AppCompatActivity implements HandlerUti
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_track_review);
-        Bundle bundle = getIntent().getExtras();
-        points = bundle.getParcelableArrayList("points");
+//        Bundle bundle = getIntent().getExtras();
+//        points = bundle.getParcelableArrayList("points");
         initMap();
         initView();
-        Log.e(TAG, "onCreate: " + points.toString());
     }
 
     private void initMap() {
@@ -93,6 +92,7 @@ public class TrackReviewActivity extends AppCompatActivity implements HandlerUti
     }
 
     private void showRoute() {
+        points = DataManagerActivity.points;
         if (points != null) {
             android.graphics.Point[] ps = new android.graphics.Point[points.size()];
             for (int i = 0; i < points.size(); i++) {

@@ -4,6 +4,7 @@ import com.nmea.codec.AbstractNmeaSentenceCodec;
 import com.nmea.codec.AccNmeaCodec;
 import com.nmea.codec.GgaNmeaCodec;
 import com.nmea.codec.GllNmeaCodec;
+import com.nmea.codec.GsvNmeaCodec;
 import com.nmea.codec.GyrNmeaCodec;
 import com.nmea.codec.RmcNmeaCodec;
 import com.nmea.codec.VdmNmeaCodec;
@@ -17,9 +18,10 @@ import java.util.Map;
 
 
 public class CodecManager {
-	private Map<String,AbstractNmeaSentenceCodec> nmeaCodecs = new HashMap<String,AbstractNmeaSentenceCodec>();
 	private static List<AbstractNmeaObject> nmeaObjectList = new ArrayList<>();
 	private static CodecManager codecManager;
+	public Buffer buffer;
+	private Map<String, AbstractNmeaSentenceCodec> nmeaCodecs = new HashMap<String, AbstractNmeaSentenceCodec>();
 	private CodecManager() {
 		this.nmeaCodecs.put(AbstractNmeaObject.GGA_PROTOL, new GgaNmeaCodec());
 		this.nmeaCodecs.put(AbstractNmeaObject.GLL_PROTOL, new GllNmeaCodec());
@@ -28,15 +30,18 @@ public class CodecManager {
 		this.nmeaCodecs.put(AbstractNmeaObject.VEL_PROTOL, new VelNmeaCodec());
 		this.nmeaCodecs.put(AbstractNmeaObject.ACC_PROTOL, new AccNmeaCodec());
 		this.nmeaCodecs.put(AbstractNmeaObject.GYR_PROTOL, new GyrNmeaCodec());
+		this.nmeaCodecs.put(AbstractNmeaObject.GSV_PROTOL, new GsvNmeaCodec());
 	}
-	public static void setNmeaObject(AbstractNmeaObject object){
-		nmeaObjectList.add(object);
-	}
+
 	public static AbstractNmeaObject getNmeaObject(){
 		if (!nmeaObjectList.isEmpty()) {
 			return nmeaObjectList.remove(0);
 		}
 		return null;
+	}
+
+	public static void setNmeaObject(AbstractNmeaObject object) {
+		nmeaObjectList.add(object);
 	}
 
 	public static synchronized CodecManager getInstance(){
@@ -45,7 +50,6 @@ public class CodecManager {
 		}
 		return codecManager;
 	}
-	public Buffer buffer;
 
 	public void decode(String content) throws Exception {
 		String objType = AbstractNmeaSentenceCodec.getContentType(content);
@@ -69,6 +73,9 @@ public class CodecManager {
 		}
 		if (AbstractNmeaObject.GYR_PROTOL.equals(objType)) {
 			this.getNmeaCodec(AbstractNmeaObject.GYR_PROTOL).decode(content);
+		}
+		if (AbstractNmeaObject.GSV_PROTOL.equals(objType)) {
+			this.getNmeaCodec(AbstractNmeaObject.GSV_PROTOL).decode(content);
 		}
 	}
 

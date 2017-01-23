@@ -6,6 +6,8 @@ import com.nmea.core.CodecManager;
 import com.nmea.obj.AbstractNmeaObject;
 import com.nmea.obj.GgaNmeaObject;
 import com.nmea.obj.VelNmeaObject;
+import com.yang.nav.model.PointManager;
+import com.yang.nav.model.entity.Frame;
 import com.yang.nav.model.entity.Point;
 
 import java.lang.ref.WeakReference;
@@ -43,18 +45,11 @@ public class SerialPortUtils {
     private List<byte[]> frameList = new ArrayList<>();
     private ReadThread thread = null;
     private Point point = null;
+    private PointManager pointManager;
+    private List<Frame> list = new ArrayList<>();
 
-    private SerialPortUtils() {
-    }
-
-    public static SerialPortUtils getInstance() {
-        if (null == portUtil) {
-            portUtil = new SerialPortUtils();
-        }
-        return portUtil;
-    }
-
-    public void setOnDataReceiveListener(OnDataReceiveListener onDataReceiveListener) {
+    public SerialPortUtils(PointManager pointManager, OnDataReceiveListener onDataReceiveListener) {
+        this.pointManager = pointManager;
         this.onDataReceiveListener = new WeakReference<>(onDataReceiveListener);
     }
 
@@ -193,31 +188,43 @@ public class SerialPortUtils {
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
-
                             AbstractNmeaObject nmeaObject = CodecManager.getNmeaObject();
                             if (nmeaObject != null) {
-                                if (nmeaObject.getObjType() == AbstractNmeaObject.GGA_PROTOL) {
+                                list.add(new Frame(null, nmeaObject.getContent()));
+                                if (nmeaObject.getObjType().equals(AbstractNmeaObject.GGA_PROTOL)) {
                                     GgaNmeaObject ggaNmeaObject = (GgaNmeaObject) nmeaObject;
-                                    if (ggaNmeaObject.getLatitude() != null && ggaNmeaObject.getLongitude() != null && ggaNmeaObject.getGpa_flag() != 0) {
-                                        point = new Point();
-                                        point.setLatitude(Double.valueOf(ggaNmeaObject.getLatitude()));
-                                        point.setLongitude(Double.valueOf(ggaNmeaObject.getLongitude()));
-                                        point.setTime(TimeUtils.convertToMil(TimeUtils.getLocalTimeFromUTC(TimeUtils.getUTC(getUTCDay(), ggaNmeaObject.getUtc_Time()), SF), SF));
+                                    if (ggaNmeaObject.getType().equals("G2")) {
+                                        if (ggaNmeaObject.getLatitude() != null && ggaNmeaObject.getLongitude() != null && ggaNmeaObject.getGpa_flag() != 0) {
+                                            point = new Point();
+                                            point.setLatitude(Double.valueOf(ggaNmeaObject.getLatitude()));
+                                            point.setLongitude(Double.valueOf(ggaNmeaObject.getLongitude()));
+                                            point.setTime(TimeUtils.convertToMil(TimeUtils.getLocalTimeFromUTC(TimeUtils.getUTC(getUTCDay(), ggaNmeaObject.getUtc_Time()), SF), SF));
+                                        }
                                     }
                                 }
-                                if (nmeaObject.getObjType() == AbstractNmeaObject.VEL_PROTOL) {
+                                if (nmeaObject.getObjType().equals(AbstractNmeaObject.VEL_PROTOL)) {
                                     VelNmeaObject velNmeaObject = (VelNmeaObject) nmeaObject;
-                                    if (velNmeaObject.getHor_speed() != null) {
-                                        if (point != null) {
-                                            point.setSpeed(Double.valueOf(velNmeaObject.getHor_speed()));
-                                            Log.e("转化的Point", point.toString());
+                                    if (velNmeaObject.getType().equals("G2")) {
+                                        if (velNmeaObject.getHor_speed() != null) {
+                                            if (point != null) {
+                                                point.setHor_speed(Double.valueOf(velNmeaObject.getHor_speed()));
+                                                point.setVer_speed(Double.valueOf(velNmeaObject.getVer_speed()));
+                                                point.setDirection(Double.valueOf(velNmeaObject.getAngel()));
+                                                Log.e("转化的Point", point.toString());
+                                            }
                                         }
                                     }
                                 }
                             }
-                            if (null != onDataReceiveListener && null != point && point.getTime() != null && point.getSpeed() != null) {
+                            if (null != onDataReceiveListener && null != point && point.getTime() != null && point.getHor_speed() != null) {
                                 onDataReceiveListener.get().onDataReceive(point);
                                 point = null;
+                            }
+                            if (list.size() > 10) {
+                                if (pointManager.insertFrames(list)) {
+                                    list.clear();
+                                    Log.e("连续十条", "插入10条");
+                                }
                             }
                         }
                     }

@@ -24,7 +24,7 @@ public class VelNmeaCodec extends AbstractNmeaSentenceCodec {
 			throw new Exception("不是VEL语句");
 		}
 		String msgChecksum = getStringChecksum(getChecksum(content));
-		System.out.println(msgChecksum);
+//		System.out.println(msgChecksum);
 		
 		//求出数据字符串长度
 		int len = content.length();
@@ -54,11 +54,12 @@ public class VelNmeaCodec extends AbstractNmeaSentenceCodec {
 		nmeaObject.setMsgChecksum(msgChecksum);
 		nmeaObject.setMsgFields(fileds);
 		nmeaObject.setMsgId(fileds.get(0));//$GPGGA
+		nmeaObject.setContent(content);
 		
 		setChanged();
 		notifyObservers(nmeaObject);
-		
-		encode(nmeaObject);
+
+//		encode(nmeaObject);
 	}
 
 	@Override

@@ -11,7 +11,8 @@ public class ObserverPrintMsg implements Observer {
 	@Override
 	public void update(Observable o, Object arg) {
 		// TODO Auto-generated method stub
-		System.out.println(arg);
+//		System.out.println(arg);
+		arg.toString();
 		CodecManager.setNmeaObject((AbstractNmeaObject) arg);
 	}
 

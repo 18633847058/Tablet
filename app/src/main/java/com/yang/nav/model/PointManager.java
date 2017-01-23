@@ -1,7 +1,9 @@
 package com.yang.nav.model;
 
 import android.content.Context;
+import android.util.Log;
 
+import com.yang.nav.model.entity.Frame;
 import com.yang.nav.model.entity.Point;
 import com.yang.nav.model.entity.PointDao;
 import com.yang.nav.utils.TimeUtils;
@@ -36,6 +38,27 @@ public class PointManager extends BaseDao<Point> {
             }
         }
         return pointManager;
+    }
+
+    public boolean insertFrames(final List<Frame> objects) {
+        boolean flag = false;
+        if (objects == null || objects.isEmpty()) {
+            return false;
+        }
+        try {
+            manager.getDaoSession().runInTx(new Runnable() {
+                @Override
+                public void run() {
+                    for (Frame object : objects) {
+                        manager.getDaoSession().insertOrReplace(object);
+                    }
+                }
+            });
+            flag = true;
+        } catch (Exception e) {
+            Log.e(TAG, e.toString());
+        }
+        return flag;
     }
     /***************************数据库查询*************************/
 
@@ -109,6 +132,16 @@ public class PointManager extends BaseDao<Point> {
         }else{
             return null;
         }
+    }
+
+    public List<Frame> queryAllFrames(Class object) {
+        List<Frame> objects = null;
+        try {
+            objects = (List<Frame>) session.getDao(object).loadAll();
+        } catch (Exception e) {
+            Log.e(TAG, e.toString());
+        }
+        return objects;
     }
 
     /***************************数据库删除*************************/

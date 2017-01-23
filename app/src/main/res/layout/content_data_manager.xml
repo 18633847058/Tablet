@@ -50,7 +50,7 @@
         android:layout_height="wrap_content"
         android:focusable="false"
         android:gravity="center"
-        android:hint="@string/selected_date"
+        android:hint="@string/date_describe"
         android:textSize="20sp" />
     <LinearLayout
         android:id="@+id/ll_deal"
@@ -79,6 +79,30 @@
             android:layout_weight="1"
             android:drawableLeft="@mipmap/btn_review"
             android:text="@string/review" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_insert"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <Button
+            android:id="@+id/btn_data_insert"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawableLeft="@mipmap/btn_insert"
+            android:text="@string/delete" />
+
+        <Button
+            android:id="@+id/btn_data_cancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawableLeft="@mipmap/btn_cancel"
+            android:text="@string/export_info" />
     </LinearLayout>
 
     <LinearLayout

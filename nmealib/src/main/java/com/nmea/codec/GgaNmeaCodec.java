@@ -27,13 +27,16 @@ public class GgaNmeaCodec extends AbstractNmeaSentenceCodec{
 	@Override
 	//$GPGGA,<1>,<2>,<3>,<4>,<5>,<6>,<7>,<8>,<9>,<10>,<11>,<12>,<13>,<14>*hh<CR><LF>
 	public void decode(String content) throws Exception {
+		if (!"G2".equals(getType(content))) {
+			throw new Exception("不是G2语句");
+		}
 		nmeaObject = new GgaNmeaObject();
 		if(!AbstractNmeaObject.GGA_PROTOL.equals(getContentType(content))){
 			throw new Exception("不是GGA语句");
 		}
 
 		String msgChecksum = getStringChecksum(getChecksum(content));
-		System.out.println(msgChecksum);
+//		System.out.println(msgChecksum);
 
 		//求出数据字符串长度
 		int len = content.length();
@@ -66,11 +69,12 @@ public class GgaNmeaCodec extends AbstractNmeaSentenceCodec{
 		nmeaObject.setMsgChecksum(msgChecksum);
 		nmeaObject.setMsgFields(fileds);
 		nmeaObject.setMsgId(fileds.get(0));//$GPGGA
+		nmeaObject.setContent(content);
 
 		setChanged();
 		notifyObservers(nmeaObject);
 
-		encode(nmeaObject);
+//		encode(nmeaObject);
 	}
 
 	@Override

@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.Bundle;
 
 import com.yang.nav.model.PointManager;
 import com.yang.nav.model.entity.Point;
@@ -28,6 +27,7 @@ public class MyAsyncTask extends AsyncTask <MyAsyncTask.Type,Integer,MyAsyncTask
     private String startTime;
     private String endTime;
     private String file;
+    private DataManagerActivity activity;
 
     public MyAsyncTask(Context context,PointManager pointManager) {
         weakReference = new WeakReference<>(context);
@@ -73,8 +73,8 @@ public class MyAsyncTask extends AsyncTask <MyAsyncTask.Type,Integer,MyAsyncTask
             case SELECT:
                 if (m == Message.SUCCESS) {
                     ToastUtils.showToast(weakReference.get(), "查找成功！");
-                    DataManagerActivity activity = (DataManagerActivity) weakReference.get();
-                    activity.setVisibility(true, points.size());
+                    activity = (DataManagerActivity) weakReference.get();
+                    activity.setDealVisibility(true, points.size());
                 } else {
                     ToastUtils.showToast(weakReference.get(), "查找失败！");
                 }
@@ -97,9 +97,9 @@ public class MyAsyncTask extends AsyncTask <MyAsyncTask.Type,Integer,MyAsyncTask
                 if (m == Message.SUCCESS) {
                     ToastUtils.showToast(weakReference.get().getApplicationContext(), "数据传输中，正在转入地图！");
                     Intent intent = new Intent(weakReference.get(), TrackReviewActivity.class);
-                    Bundle bundle = new Bundle();
-                    bundle.putParcelableArrayList("points", points);
-                    intent.putExtras(bundle);
+//                    Bundle bundle = new Bundle();
+//                    bundle.putParcelableArrayList("points", points);
+//                    intent.putExtras(bundle);
                     weakReference.get().startActivity(intent);
                 }
                 break;

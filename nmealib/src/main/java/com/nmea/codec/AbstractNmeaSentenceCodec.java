@@ -19,10 +19,6 @@ public abstract class AbstractNmeaSentenceCodec extends Observable{
 	protected  AbstractNmeaObject nmeaObject;
 	protected List<Observer> observers = new ArrayList<Observer>();
 	
-	public abstract void decode(String content) throws Exception;
-	
-	public abstract List<String> encode(AbstractNmeaObject obj) throws Exception;
-	
 	public static int getChecksum(String content) throws Exception {
         int checksum = 0;
         for (int i = 0; i < content.length(); i++) {
@@ -50,6 +46,10 @@ public abstract class AbstractNmeaSentenceCodec extends Observable{
 		return StringUtils.substring(content,3,6);
 	}
 
+	public static String getType(String content) {
+		return StringUtils.substring(content, 1, 3);
+	}
+	
 	public static List<Field> getSentenceFields(NmeaSentence nmeaSentence) {
 		// TODO Auto-generated method stub
 		return null;
@@ -65,6 +65,10 @@ public abstract class AbstractNmeaSentenceCodec extends Observable{
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	public abstract void decode(String content) throws Exception;
+
+	public abstract List<String> encode(AbstractNmeaObject obj) throws Exception;
 
 	public void decode(EncapsulationSentence sentence) throws Exception{
 		

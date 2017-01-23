@@ -12,7 +12,8 @@ public abstract class AbstractNmeaObject {
 	public static final String VEL_PROTOL = "VEL";
 	public static final String ACC_PROTOL = "ACC";
 	public static final String GYR_PROTOL = "GYR";
-	
+	public static final String GSV_PROTOL = "GSV";
+
 	protected String msgId;
 	protected String type;
 	
@@ -21,8 +22,17 @@ public abstract class AbstractNmeaObject {
     protected List<String> msgFields = new ArrayList<String>();
 	
 	protected String objType;
-	
-	
+
+	protected String content;
+
+
+	public String getContent() {
+		return content;
+	}
+
+	public void setContent(String content) {
+		this.content = content;
+	}
 
 	/**
 	 * @return the msgId
