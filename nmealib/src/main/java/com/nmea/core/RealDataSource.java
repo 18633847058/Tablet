@@ -13,14 +13,14 @@ public class RealDataSource extends AbstractDataSource{
 		String gll = "$GPGLL,3723.2475,N,12158.3416,W,161229.487,A*2C\r\n";
 		String gga = "$GPGGA,161229.487,3723.2475,N,12158.3416,W,1,07,1.0,9.0,M, , ,,0000*18\r\n";
 		String text = "$GPGGA,161229.487,3723.2475,N,12158.3416,W,1,07,1.0,9.0,M, , ,,0000*18\r\n";
-		String gsv = "$GPGSV,3,1,10,20,78,331,45,01,59,235,47,22,41,069,,13,32,252,45*70";
+		String gsv = "$B2GSV,2,2,,,,,*60";
 
-		codecManager.decode(text);
+		codecManager.decode(gsv);
 		AbstractNmeaObject nmeaObject = CodecManager.getNmeaObject();
 		if (nmeaObject != null) {
 			if (nmeaObject.getObjType().equals(AbstractNmeaObject.GSV_PROTOL)) {
 				GsvNmeaObject gsvNmeaObject = (GsvNmeaObject) nmeaObject;
-				System.out.println(gsvNmeaObject.getContent());
+				System.out.println(gsvNmeaObject.getChannels());
 			}
 			if (nmeaObject.getObjType().equals(AbstractNmeaObject.GGA_PROTOL)) {
 				GgaNmeaObject ggaNmeaObject = (GgaNmeaObject) nmeaObject;

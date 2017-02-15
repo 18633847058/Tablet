@@ -178,7 +178,7 @@ public class TestActivity extends AppCompatActivity implements OnDateSetListener
                     try {
                         BufferedWriter bw = new BufferedWriter(new FileWriter(log, true));
                         for (int i = 0; i < list.size(); i++) {
-                            Log.e("Frame", list.get(i).getContent());
+//                            Log.e("Frame", list.get(i).getContent());
                             bw.write(list.get(i).getContent() + "\r\n");
                         }
                         //保证输出缓冲区中的所有内容

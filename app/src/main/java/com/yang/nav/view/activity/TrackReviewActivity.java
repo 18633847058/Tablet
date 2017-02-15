@@ -16,6 +16,7 @@ import com.yang.nav.R;
 import com.yang.nav.map.CustomMapView;
 import com.yang.nav.model.entity.Point;
 import com.yang.nav.utils.HandlerUtils;
+import com.yang.nav.utils.PointUtils;
 
 import java.util.ArrayList;
 
@@ -98,15 +99,14 @@ public class TrackReviewActivity extends AppCompatActivity implements HandlerUti
             for (int i = 0; i < points.size(); i++) {
 
                 Point point = points.get(i);
-                Double lon = point.getLongitude() * 100000;
-                Double lat = point.getLatitude() * 100000;
-                android.graphics.Point p = new android.graphics.Point(lon.intValue(), lat.intValue());
+                Log.e(TAG, "showRoute: " + points.get(i).toString());
+                android.graphics.Point p = PointUtils.gps84_To_Gcj02(point.getLongitude(), point.getLatitude());
                 if (i == points.size() - 1) {
                     customMapView.setCarPosition(p);
                 }
                 ps[i] = p;
             }
-            Log.e(TAG, "showRoute: " + ps);
+//            Log.e(TAG, "showRoute: " + ps);
             pl1 = new PolylineOverlay(ps, false);
             pl1.setColor(0xffaa0000);
             pl1.setStrokeStyle(Overlay.StrokeStyle.solid);

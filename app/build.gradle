@@ -40,10 +40,12 @@ dependencies {
     })
     //    This is only needed if you want to use encrypted databases
     compile 'com.android.support:appcompat-v7:24.2.1'
+    compile 'com.android.support:cardview-v7:24.2.1'
     compile 'org.greenrobot:greendao:3.2.0'
     compile 'com.jzxiang.pickerview:TimePickerDialog:1.0.1'
     compile 'net.zetetic:android-database-sqlcipher:3.5.4'
     compile 'com.android.support:design:24.2.1'
+    compile 'com.diogobernardino:williamchart:2.4.0'
     testCompile 'junit:junit:4.12'
     compile files('libs/commons-lang-2.6.jar')
     compile project(':nmealib')

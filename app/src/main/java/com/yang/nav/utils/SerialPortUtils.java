@@ -4,7 +4,9 @@ import android.util.Log;
 
 import com.nmea.core.CodecManager;
 import com.nmea.obj.AbstractNmeaObject;
+import com.nmea.obj.ChannelInfo;
 import com.nmea.obj.GgaNmeaObject;
+import com.nmea.obj.GsvNmeaObject;
 import com.nmea.obj.VelNmeaObject;
 import com.yang.nav.model.PointManager;
 import com.yang.nav.model.entity.Frame;
@@ -36,21 +38,27 @@ public class SerialPortUtils {
     public byte flowControl = 0;
     CodecManager codecManager = CodecManager.getInstance();
     private WeakReference<OnDataReceiveListener> onDataReceiveListener;
+    private WeakReference<OnGsvReceiveListener> onGsvReceiveListener;
     //缓存的字节数组
-    private byte[] recvBuff = new byte[10240];
+    private byte[] recvBuff = null;
     private byte[] oneFrameBuff = null;
     private int startPoint = 0;
     private int endPoint = 0;
     private int recvBuffLen = 0;
-    private List<byte[]> frameList = new ArrayList<>();
+    private List<byte[]> frameList = null;
     private ReadThread thread = null;
     private Point point = null;
     private PointManager pointManager;
-    private List<Frame> list = new ArrayList<>();
+    private List<Frame> list = null;
+    private List<ChannelInfo> g2channelInfos = null;
+    private List<ChannelInfo> b2channelInfos = null;
+    private int i = 0;
+    private int j = 0;
 
-    public SerialPortUtils(PointManager pointManager, OnDataReceiveListener onDataReceiveListener) {
+    public SerialPortUtils(PointManager pointManager, OnDataReceiveListener onDataReceiveListener, OnGsvReceiveListener onGsvReceiveListener) {
         this.pointManager = pointManager;
         this.onDataReceiveListener = new WeakReference<>(onDataReceiveListener);
+        this.onGsvReceiveListener = new WeakReference<>(onGsvReceiveListener);
     }
 
     public boolean onConfig(){
@@ -70,6 +78,17 @@ public class SerialPortUtils {
     }
 
     public void onStart(){
+        recvBuff = new byte[10240];
+        oneFrameBuff = null;
+        startPoint = 0;
+        endPoint = 0;
+        recvBuffLen = 0;
+        frameList = new ArrayList<>();
+        list = new ArrayList<>();
+        g2channelInfos = new ArrayList<>();
+        b2channelInfos = new ArrayList<>();
+        i = 0;
+        j = 0;
         thread = new ReadThread();
         thread.start();
     }
@@ -162,6 +181,12 @@ public class SerialPortUtils {
         public void onDataReceive(Point p);
     }
 
+    public interface OnGsvReceiveListener {
+        public void onG2GsvReceive(List<ChannelInfo> l);
+
+        public void onB2GsvReceive(List<ChannelInfo> l);
+    }
+
     private class ReadThread extends Thread {
 
         @Override
@@ -207,11 +232,47 @@ public class SerialPortUtils {
                                     if (velNmeaObject.getType().equals("G2")) {
                                         if (velNmeaObject.getHor_speed() != null) {
                                             if (point != null) {
-                                                point.setHor_speed(Double.valueOf(velNmeaObject.getHor_speed()));
-                                                point.setVer_speed(Double.valueOf(velNmeaObject.getVer_speed()));
-                                                point.setDirection(Double.valueOf(velNmeaObject.getAngel()));
-                                                Log.e("转化的Point", point.toString());
+                                                try {
+                                                    point.setHor_speed(Double.valueOf(velNmeaObject.getHor_speed()));
+                                                    point.setVer_speed(Double.valueOf(velNmeaObject.getVer_speed()));
+                                                    point.setDirection(Double.valueOf(velNmeaObject.getAngel()));
+                                                    Log.e("转化的Point", point.toString());
+                                                } catch (Exception e) {
+                                                    Log.e("异常", e.toString());
+                                                }
                                             }
+                                        }
+                                    }
+                                }
+
+                                if (nmeaObject.getObjType().equals(AbstractNmeaObject.GSV_PROTOL)) {
+                                    GsvNmeaObject gsvNmeaObject = (GsvNmeaObject) nmeaObject;
+                                    if (gsvNmeaObject.getType().equals("G2")) {
+                                        if (gsvNmeaObject.getChannels() == null) {
+                                            g2channelInfos.clear();
+                                            i = 0;
+                                            break;
+                                        }
+                                        i = gsvNmeaObject.getSatellitesInView();
+                                        if (gsvNmeaObject.getMessageNumber() == 1) {
+                                            g2channelInfos.clear();
+                                        }
+                                        for (int m = 0; m < gsvNmeaObject.getChannels().size(); m++) {
+                                            g2channelInfos.add(gsvNmeaObject.getChannels().get(m));
+                                        }
+                                    }
+                                    if (gsvNmeaObject.getType().equals("B2")) {
+                                        if (gsvNmeaObject.getChannels() == null) {
+                                            b2channelInfos.clear();
+                                            j = 0;
+                                            break;
+                                        }
+                                        j = gsvNmeaObject.getSatellitesInView();
+                                        if (gsvNmeaObject.getMessageNumber() == 1) {
+                                            b2channelInfos.clear();
+                                        }
+                                        for (int m = 0; m < gsvNmeaObject.getChannels().size(); m++) {
+                                            b2channelInfos.add(gsvNmeaObject.getChannels().get(m));
                                         }
                                     }
                                 }
@@ -219,6 +280,16 @@ public class SerialPortUtils {
                             if (null != onDataReceiveListener && null != point && point.getTime() != null && point.getHor_speed() != null) {
                                 onDataReceiveListener.get().onDataReceive(point);
                                 point = null;
+                            }
+                            if (null != onGsvReceiveListener && i != 0 && i == g2channelInfos.size()) {
+                                onGsvReceiveListener.get().onG2GsvReceive(g2channelInfos);
+                                g2channelInfos.clear();
+                                i = 0;
+                            }
+                            if (null != onGsvReceiveListener && j != 0 && j == b2channelInfos.size()) {
+                                onGsvReceiveListener.get().onB2GsvReceive(b2channelInfos);
+                                b2channelInfos.clear();
+                                j = 0;
                             }
                             if (list.size() > 10) {
                                 if (pointManager.insertFrames(list)) {
